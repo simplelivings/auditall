@@ -26,6 +26,8 @@ public class AuditInfo {
 
     private Integer auditPage;
 
+    private Integer auditNum;
+
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
