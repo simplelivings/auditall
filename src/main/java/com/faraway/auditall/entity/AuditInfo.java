@@ -38,6 +38,4 @@ public class AuditInfo {
     @TableField(fill = FieldFill.INSERT)
     private Integer version;
 
-
-
 }

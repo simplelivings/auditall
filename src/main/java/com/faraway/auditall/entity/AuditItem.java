@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 import org.springframework.context.annotation.Bean;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -19,10 +20,16 @@ public class AuditItem {
     @TableId(type = IdType.AUTO)
     private Integer id;
 
+    private Integer page;
+
     private String auditItem;
 
     private Integer auditNum;
 
+    private String userName;
+
+    @TableField(exist = false)
+    private List<String> auditItemList;
 
     @TableField(exist = false)
     private Integer totalNum;
@@ -37,6 +44,6 @@ public class AuditItem {
     @TableField(fill = FieldFill.INSERT)
     private Integer version;
 
-    private Integer page;
+
 
 }

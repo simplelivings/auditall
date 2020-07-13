@@ -7,30 +7,24 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "auditphoto")
-public class AuditPhoto {
+@TableName(value = "registerinfo")
+public class RegisterInfo {
 
     @TableId(type = IdType.AUTO)
     private Integer id;
 
     private String userName;
 
-    private String auditPhoto;
+    private String password;
 
-    private Integer auditPage;
+    private String familyName;
 
-    private Integer photoNumber;
-
-    private Integer auditNum;
-
-    @TableField(exist = false)
-    private List<String> auditPhotoList;
+    private String emailAddress;
 
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;

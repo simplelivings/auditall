@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://172.17.162.232:3306/auditall?serverTimezone=GMT%2B8&useSSL=false
+#    username: fan
+#    password: "06152022"
+#    url: jdbc:mysql://39.106.186.110:3306/auditall?serverTimezone=GMT%2B8&useSSL=false
+    url: jdbc:mysql://localhost:3306/auditall?serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf8
+#    username: fan
+#    password: "06152022"
+    username: root
+    password: 123456
+  profiles:
+    active: dev
+  mail:
+    host: smtp.qq.com
+    username: 593931651@qq.com
+    password: mqzumfzoivpobeee
+    properties:
+      mail:
+        smtp:
+          socketFactory: class:javax.net.ssl.SSLSocketFactory
+          port: 587
+    default-encoding: utf-8
+    protocol: smtp
+
+
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: false
+  global-config:
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+server:
+  port: 8800
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true

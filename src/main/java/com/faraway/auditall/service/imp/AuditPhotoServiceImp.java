@@ -19,10 +19,14 @@ public class AuditPhotoServiceImp implements AuditPhotoService {
 
     @Override
     public int insertOrUpdateAuditPhoto(AuditPhoto auditPhoto) {
+
         QueryWrapper<AuditPhoto> queryWrapper = new QueryWrapper<>();
         //根据用户名和审核页码，新建查询条件；
         queryWrapper.eq("userName", auditPhoto.getUserName()).eq("auditPage",auditPhoto.getAuditPage());
         int photoNumbers = auditPhoto.getAuditPhotoList().size();//前端回传图片数量
+
+        QueryWrapper<AuditPhoto> queryWrapper1 = new QueryWrapper<>();
+        queryWrapper1.eq("userName", auditPhoto.getUserName());
 
         switch (photoNumbers) {
             case 2://前端返回图片数量为2
@@ -33,7 +37,6 @@ public class AuditPhotoServiceImp implements AuditPhotoService {
                     tempAuditPhoto.setAuditPage(auditPhoto.getAuditPage());
                     tempAuditPhoto.setPhotoNumber(i);
                     auditPhotoMapper.insert(tempAuditPhoto);
-                    System.out.println("=======service======= case 2============="+tempAuditPhoto.getPhotoNumber());
                 }
                 break;
             case 1:
@@ -43,12 +46,14 @@ public class AuditPhotoServiceImp implements AuditPhotoService {
                 tempAuditPhoto.setAuditPage(auditPhoto.getAuditPage());
                 tempAuditPhoto.setPhotoNumber(0);
                 auditPhotoMapper.insert(tempAuditPhoto);
-                System.out.println("======service======== case 1============="+tempAuditPhoto.getPhotoNumber());
                 break;
             default:
                 auditPhotoMapper.delete(queryWrapper);//清空符合条件数据库中数据
                 break;
         }
+        List<AuditPhoto> auditPhotoList = auditPhotoMapper.selectList(queryWrapper1);
+        System.out.println("==========图片成功插入数据库============");
+
         return photoNumbers;
     }
 }

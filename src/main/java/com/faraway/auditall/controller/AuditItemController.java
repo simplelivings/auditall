@@ -15,9 +15,10 @@ public class AuditItemController {
     private AuditItemServiceImp auditItemServiceImp;
 
 
-    @GetMapping("/insert")
-    public void insertAuditItem(AuditItem auditItem) {
-        auditItemServiceImp.insertAuditItem(auditItem);
+    @PostMapping(value = "/insert",produces ="text/html;charset=utf-8")
+    public void insertAuditItem(@RequestBody AuditItem auditItem) {
+        System.out.println("======auditItem========="+auditItem);
+        auditItemServiceImp.insertOrUpdateAuditItem(auditItem);
         System.out.println("==AuditItemController==插入成功====");
     }
 
@@ -25,10 +26,11 @@ public class AuditItemController {
     @GetMapping("/showone")
     public AuditItem selectOneAuditItem(@RequestParam("page") int page,@RequestParam("num") int num) {
         AuditItem auditItem = new AuditItem();
+        System.out.println("=======page========"+page);
+        System.out.println("=======num========"+num);
         if (page >=0 && num >=0){
             auditItem = auditItemServiceImp.selectOneAuditItem(page,num);
             auditItem.setTotalNum(auditItemServiceImp.selectTotalAuditItemNum(num));
-            System.out.println("=======page========"+page);
             return auditItem;
         }else{
             return auditItem;

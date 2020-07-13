@@ -1,7 +1,11 @@
 package com.faraway.auditall.service.imp;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.faraway.auditall.entity.BasicInfo;
+import com.faraway.auditall.mapper.BasicInfoMapper;
+import com.faraway.auditall.service.AuditNameService;
 import com.faraway.auditall.service.BasicInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,6 +17,12 @@ public class BasicInfoServiceImp implements BasicInfoService {
     int auditIteNum = 0;
     int auditObjNum = 0;
     String auditObjTemp;
+
+    @Autowired
+    private BasicInfoMapper basicInfoMapper;
+
+    @Autowired
+    private AuditNameService auditNameService;
 
     @Override
     public int findAuditNum(BasicInfo basicInfo) {
@@ -37,7 +47,7 @@ public class BasicInfoServiceImp implements BasicInfoService {
                 auditObjTemp = "stamp";
             } else if ((basicInfo.getAuditObj().toLowerCase().contains("w")) ||
                     (basicInfo.getAuditObj().contains("焊"))) {
-                auditObjTemp = "welb";
+                auditObjTemp = "weld";
             } else if ((basicInfo.getAuditObj().toLowerCase().contains("c")) ||
                     (basicInfo.getAuditObj().contains("剪"))) {
                 auditObjTemp = "cut";
@@ -50,7 +60,7 @@ public class BasicInfoServiceImp implements BasicInfoService {
                 auditObjTemp = "equipment";
             }else if ((basicInfo.getAuditObj().toLowerCase().contains("l"))||
                     (basicInfo.getAuditObj().contains("物流"))){
-                auditObjTemp = "logical";
+                auditObjTemp = "logic";
             }else if ((basicInfo.getAuditObj().toLowerCase().contains("q"))||
                     (basicInfo.getAuditObj().contains("质量"))){
                 auditObjTemp = "quality";
@@ -66,11 +76,100 @@ public class BasicInfoServiceImp implements BasicInfoService {
             }
         }
 
+        String password = auditNameService.findPassword("common").getPassword();
         //判断密码是否正确，并返回审核表编号
-        if (basicInfo.getPassword().equals("269868")) {
+        if (basicInfo.getPassword().equals(password)) {
             return (auditIteNum*7+auditObjNum);
         } else {
             return -1;
+        }
+    }
+
+    @Override
+    public int findAuditNumSuper(BasicInfo basicInfo) {
+        if (basicInfo != null) {
+            //得到审核项目的编号
+            for (int i = 0; i < auditIteList.length; i++) {
+                if (basicInfo.getAuditIte().equals(auditIteList[i])) {
+                    if (basicInfo.getAuditIte().equals("分层审核")) {
+                        for (int j = 0; j < auditRenList.length; j++) {
+                            if (basicInfo.getAuditRen().equals(auditRenList[j])) {
+                                auditIteNum = j;
+                            }
+                        }
+                    } else {
+                        auditIteNum = i + 4;
+                    }
+                }
+            }
+
+            if ((basicInfo.getAuditObj().toLowerCase().contains("d")) ||
+                    (basicInfo.getAuditObj().contains("冲"))) {
+                auditObjTemp = "stamp";
+            } else if ((basicInfo.getAuditObj().toLowerCase().contains("w")) ||
+                    (basicInfo.getAuditObj().contains("焊"))) {
+                auditObjTemp = "weld";
+            } else if ((basicInfo.getAuditObj().toLowerCase().contains("c")) ||
+                    (basicInfo.getAuditObj().contains("剪"))) {
+                auditObjTemp = "cut";
+            } else if ((basicInfo.getAuditObj().toLowerCase().contains("m")) ||
+                    (basicInfo.getAuditObj().contains("钣"))) {
+                auditObjTemp = "metal";
+            } else if ((basicInfo.getAuditObj().toLowerCase().contains("e")) ||
+                    (basicInfo.getAuditObj().contains("设备")) || (
+                    basicInfo.getAuditObj().contains("工装"))) {
+                auditObjTemp = "equipment";
+            }else if ((basicInfo.getAuditObj().toLowerCase().contains("l"))||
+                    (basicInfo.getAuditObj().contains("物流"))){
+                auditObjTemp = "logic";
+            }else if ((basicInfo.getAuditObj().toLowerCase().contains("q"))||
+                    (basicInfo.getAuditObj().contains("质量"))){
+                auditObjTemp = "quality";
+            }
+        }
+
+        //获得审核对象编号
+        if (auditObjTemp!=null){
+            for (int i = 0; i < auditObjList.length; i++) {
+                if (auditObjTemp.equals(auditObjList[i])){
+                    auditObjNum = i;
+                }
+            }
+        }
+
+        String password = auditNameService.findPassword("super").getPassword();
+        //判断密码是否正确，并返回审核表编号
+        if (basicInfo.getPassword().equals(password)) {
+            return (auditIteNum*7+auditObjNum);
+        } else {
+            return -1;
+        }
+    }
+
+    @Override
+    public int insertOrUpdateBasicInfo(BasicInfo basicInfo) {
+
+        QueryWrapper<BasicInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userName",basicInfo.getUserName());
+        BasicInfo basicInfoExist = basicInfoMapper.selectOne(queryWrapper);
+
+        if (basicInfoExist!=null){
+            basicInfoMapper.update(basicInfo,queryWrapper);
+        }else{
+            basicInfoMapper.insert(basicInfo);
+        }
+        return 1;
+    }
+
+    @Override
+    public BasicInfo findBasicInfoByName(String name) {
+        QueryWrapper<BasicInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userName",name);
+        BasicInfo basicInfo = basicInfoMapper.selectOne(queryWrapper);
+        if (basicInfo!=null){
+            return basicInfo;
+        }else{
+            return null;
         }
     }
 }
