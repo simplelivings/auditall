@@ -34,4 +34,18 @@ public class RegisterInfoServiceImp implements RegisterInfoService {
             return -1;
         }
     }
+
+
+    @Override
+    public RegisterInfo findOneRegisterByName(String userName) {
+        if (userName!=null){
+            QueryWrapper<RegisterInfo> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("userName",userName);
+            RegisterInfo registerInfo = registerInfoMapper.selectOne(queryWrapper);
+            return registerInfo;
+        }else {
+            return null;
+        }
+    }
+
 }

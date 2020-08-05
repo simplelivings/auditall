@@ -70,8 +70,6 @@ public class AuditPhotoController {
             //获得审核者姓名
             String name = auditPhoto.getUserName();
 
-            System.out.println("++++++++++++++++AuditPhotoController++++++++++++++++");
-
             //图片Base64解码，并存入服务器
             switch (numberData) {
                 case 2://前端返回的图片数量为2
@@ -111,10 +109,8 @@ public class AuditPhotoController {
                     for (int i = 0; i < 2; i++) {//删除所有对应页码已有文件
                         String fileName = "name" + name + "page" + page + "num" + i + ".jpg";
                         File file = new File(PATH + fileName);
-                        System.out.println("=======controller====default==fileName=======" + file);
                         if (file.exists()) {
                             file.delete();
-                            System.out.println("====controller====default=delete===" + i);
                         }
                     }
                     break;
@@ -140,21 +136,28 @@ public class AuditPhotoController {
         //得到已审核的项目的数量
         QueryWrapper<AuditInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userName", auditPhoto.getUserName());
-        int totalNum = auditInfoMapper.selectCount(queryWrapper);
+        int totalNum = 0;
+        if (auditInfoMapper.selectCount(queryWrapper)!=null){
+            totalNum = auditInfoMapper.selectCount(queryWrapper);
+        }
 
         QueryWrapper<AuditItem> auditItemQueryWrapper = new QueryWrapper<>();
         auditItemQueryWrapper.eq("auditNum",auditPhoto.getAuditNum());
-        int totalItemNum = auditItemMapper.selectCount(auditItemQueryWrapper);
+        int totalItemNum = 0;
+        if (auditItemMapper.selectCount(auditItemQueryWrapper)!=null){
+            totalItemNum = auditItemMapper.selectCount(auditItemQueryWrapper);
+        }
 
         //返回值
         int returnNum = 0;
 
-        System.out.println("+++++++++++++totalNum==========" + totalNum);
-        System.out.println("+++++++++++++totalItemNum==========" + totalItemNum);
 
         if (auditPhoto != null) {
             //获得图片src的list
-            List<String> tempList = auditPhoto.getAuditPhotoList();
+            List<String> tempList = new ArrayList<>();
+            if (auditPhoto.getAuditPhotoList()!=null && auditPhoto.getAuditPhotoList().size()>0){
+                tempList = auditPhoto.getAuditPhotoList();
+            }
 
             //获得审核页面编号
             int page = auditPhoto.getAuditPage();
@@ -162,24 +165,23 @@ public class AuditPhotoController {
             //图片数量信息放入数据库，并得到图片数量
             int numberData = auditPhotoServiceImp.insertOrUpdateAuditPhoto(auditPhoto);
 
-
             //获得审核者姓名
             String name = auditPhoto.getUserName();
-
-            System.out.println("++++++++++++++++AuditPhotoController++++++++++++++++");
 
             //图片Base64解码，并存入服务器
             switch (numberData) {
                 case 2://前端返回的图片数量为2
-                    for (int i = 0; i < tempList.size(); i++) {
-                        String fileName = "name" + name + "page" + page + "num" + i + ".jpg";//文件名
-                        try {//Ba64解码
-                            FileOutputStream fos = new FileOutputStream(new File(PATH + fileName));
-                            byte[] dBytes = Base64.getDecoder().decode(tempList.get(i));
-                            fos.write(dBytes);
-                            fos.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    if (tempList!=null && tempList.size()>0){
+                        for (int i = 0; i < tempList.size(); i++) {
+                            String fileName = "name" + name + "page" + page + "num" + i + ".jpg";//文件名
+                            try {//Ba64解码
+                                FileOutputStream fos = new FileOutputStream(new File(PATH + fileName));
+                                byte[] dBytes = Base64.getDecoder().decode(tempList.get(i));
+                                fos.write(dBytes);
+                                fos.close();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                     break;
@@ -215,6 +217,7 @@ public class AuditPhotoController {
                     }
                     break;
             }
+
             //最后一页，数据插入excel
             if (totalNum == auditPhoto.getAuditPage()) {
                 auditInfoServiceImp.generateExcel(auditPhoto);

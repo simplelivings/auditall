@@ -30,6 +30,8 @@ public class BasicInfo {
 
     private Integer auditNum;
 
+    private Integer userStatu;
+
     private String token;
 
     @TableField(fill = FieldFill.INSERT)

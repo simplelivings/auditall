@@ -23,14 +23,4 @@ public class AuditInfoController {
     public AuditNum insertOrUpdateAuditInfo(@RequestBody AuditInfo auditInfo) {
         return auditInfoServiceImp.insertOrUpdateAuditInfo(auditInfo);
     }
-
-//    @PostMapping("/generate")
-//    public void generateExcel(@RequestBody AuditPhoto auditPhoto) throws IOException, MessagingException, InterruptedException {
-//        auditInfoServiceImp.generateExcel(auditPhoto);
-//    }
-
-    public String sendMail(){
-        return "";
-    }
-
 }

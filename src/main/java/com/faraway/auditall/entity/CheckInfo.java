@@ -12,21 +12,35 @@ import java.util.Date;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "registerinfo")
-public class RegisterInfo {
-
+@TableName(value = "checkinfo")
+public class CheckInfo {
     @TableId(type = IdType.AUTO)
     private Integer id;
 
     private String userName;
 
-    private String password;
+    private Integer auditNum;
 
-    private String familyName;
+    private Integer checkPage;
 
-    private String emailAddress;
+    private Integer checkType;
 
-    private Integer userRight;
+    private String partNum;
+
+    private Integer productNum;
+
+    private Integer checkNum;
+
+    private Integer checkStatu;
+
+    private String checkNote;
+
+    @TableField(fill = FieldFill.INSERT)
+    private Date checkDate;
+
+    private String produceTime;
+
+    private String checkTime;
 
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;

@@ -6,4 +6,6 @@ public interface RegisterInfoService {
     public int findRegisterInfoByName(String userName);
 
     public int insertRegister(RegisterInfo registerInfo);
+
+    public RegisterInfo findOneRegisterByName(String userName);
 }

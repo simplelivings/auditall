@@ -17,21 +17,22 @@ public class AuditItemController {
 
     @PostMapping(value = "/insert",produces ="text/html;charset=utf-8")
     public void insertAuditItem(@RequestBody AuditItem auditItem) {
-        System.out.println("======auditItem========="+auditItem);
         auditItemServiceImp.insertOrUpdateAuditItem(auditItem);
-        System.out.println("==AuditItemController==插入成功====");
     }
 
     //接收AuditPage页面请求数据，返回auditItem
     @GetMapping("/showone")
     public AuditItem selectOneAuditItem(@RequestParam("page") int page,@RequestParam("num") int num) {
         AuditItem auditItem = new AuditItem();
-        System.out.println("=======page========"+page);
-        System.out.println("=======num========"+num);
         if (page >=0 && num >=0){
-            auditItem = auditItemServiceImp.selectOneAuditItem(page,num);
-            auditItem.setTotalNum(auditItemServiceImp.selectTotalAuditItemNum(num));
-            return auditItem;
+            if (auditItemServiceImp.selectOneAuditItem(page, num)!=null){
+                auditItem = auditItemServiceImp.selectOneAuditItem(page,num);
+                auditItem.setTotalNum(auditItemServiceImp.selectTotalAuditItemNum(num));
+                return auditItem;
+            }else {
+                return auditItem;
+            }
+
         }else{
             return auditItem;
         }

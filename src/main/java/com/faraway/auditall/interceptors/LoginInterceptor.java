@@ -3,6 +3,7 @@ package com.faraway.auditall.interceptors;
 import com.faraway.auditall.entity.BasicInfo;
 import com.faraway.auditall.mapper.BasicInfoMapper;
 import com.faraway.auditall.service.BasicInfoService;
+import com.faraway.auditall.service.imp.BasicInfoServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -16,14 +17,14 @@ import javax.servlet.http.HttpSession;
 public class LoginInterceptor implements HandlerInterceptor {
 
     @Autowired
-    private BasicInfoService basicInfoService;
+    private BasicInfoServiceImp basicInfoServiceImp;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         String token = request.getParameter("auditWay");
         String name = request.getParameter("userName");
-        BasicInfo basicInfo = basicInfoService.findBasicInfoByName(name);
+        BasicInfo basicInfo = basicInfoServiceImp.findBasicInfoByName(name);
 
         if (token!=null && token.equals(basicInfo.getToken())){
             return true;

@@ -25,6 +25,7 @@ public class WebConfigurer implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
@@ -36,8 +37,10 @@ public class WebConfigurer implements WebMvcConfigurer {
                         "/auditphoto/insertandexcel",
                         "/auditinfo/generate",
                         "/basicinfo/superlogin",
-                        "/audititem/insert");
+                        "/audititem/insert",
+                        "/check/checkInfo",
+                        "/check/insert",
+                        "/checkphoto/insert",
+                        "/check/testExcel");
     }
-
-
 }
