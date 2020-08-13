@@ -26,10 +26,10 @@ public class CheckPhoto {
 
     private Integer photoNumber;
 
+    private String produceTime;
+
     @TableField(fill = FieldFill.INSERT)
     private Date checkDate;
-
-    private String produceTime;
 
     @TableField(exist = false)
     private List<String> checkPhotoList;

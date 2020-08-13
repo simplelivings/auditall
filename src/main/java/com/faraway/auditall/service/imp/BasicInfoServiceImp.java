@@ -106,15 +106,13 @@ public class BasicInfoServiceImp implements BasicInfoService {
                 }
             }
 
-            if (registerInfoServiceImp.findOneRegisterByName(basicInfo.getUserName())!=null){
-
+            if (registerInfoServiceImp.findOneRegisterByName(basicInfo.getUserName()) != null) {
                 registerInfo = registerInfoServiceImp.findOneRegisterByName(basicInfo.getUserName());
                 password = registerInfo.getPassword();
             }
 
             //判断密码是否正确，用户是否登录，如未登录设置登录状态为1，并返回审核表编号
             if (basicInfo.getPassword().equals(password)) {
-//                basicInfoMapper.delete(queryWrapperBasicInfo);
                 auditInfoMapper.delete(queryWrapperAuditInfo);
                 auditPhotoMapper.delete(queryWrapperAuditPhoto);
                 return (auditIteNum * 7 + auditObjNum);
@@ -124,7 +122,6 @@ public class BasicInfoServiceImp implements BasicInfoService {
         } else {
             return -1;
         }
-
     }
 
     @Override
@@ -197,7 +194,7 @@ public class BasicInfoServiceImp implements BasicInfoService {
         QueryWrapper<BasicInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userName", basicInfo.getUserName());
         BasicInfo basicInfoExist = null;
-        if (basicInfoMapper.selectOne(queryWrapper)!=null){
+        if (basicInfoMapper.selectOne(queryWrapper) != null) {
             basicInfoExist = basicInfoMapper.selectOne(queryWrapper);
         }
 
@@ -219,7 +216,7 @@ public class BasicInfoServiceImp implements BasicInfoService {
         QueryWrapper<BasicInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userName", name);
         BasicInfo basicInfo = null;
-        if (basicInfoMapper.selectOne(queryWrapper)!=null){
+        if (basicInfoMapper.selectOne(queryWrapper) != null) {
             basicInfo = basicInfoMapper.selectOne(queryWrapper);
         }
         if (basicInfo != null) {

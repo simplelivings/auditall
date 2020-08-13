@@ -2,6 +2,7 @@ package com.faraway.auditall.controller;
 
 import com.faraway.auditall.entity.CheckPhoto;
 import com.faraway.auditall.service.imp.CheckPhotoServiceImp;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/checkphoto")
 @CrossOrigin  //解决跨域
+@Slf4j
 public class CheckPhotoController {
 
     @Autowired
@@ -33,18 +35,23 @@ public class CheckPhotoController {
         int returnNum = 0;
         if (checkPhoto!=null){
             //获得图片src的list
-            List<String> tempList = new ArrayList<>();
-            if (checkPhoto.getCheckPhotoList()!=null && checkPhoto.getCheckPhotoList().size()>0){
-                tempList = checkPhoto.getCheckPhotoList();
-            }
+            List<String> tempList = checkPhoto.getCheckPhotoList();
 
             int numberDate = checkPhotoServiceImp.insertOrUpdateCheckPhoto(checkPhoto);
 
-            String partNum = checkPhoto.getPartNum();
+            String partNum = "";
+            if (checkPhoto.getPartNum()!=null){
+                partNum = checkPhoto.getPartNum();
+            }
+            String produceTime = "";
+            if (checkPhoto.getProduceTime()!=null){
+                produceTime = checkPhoto.getProduceTime();
+            }
 
-            int checkType = checkPhoto.getCheckType();
-
-            String produceTime = checkPhoto.getProduceTime();
+            int checkType = 0;
+            if (checkPhoto.getCheckType()!=null){
+                checkType = checkPhoto.getCheckType();
+            }
 
             //图片Base64解码，并存入服务器
             switch (numberDate) {
@@ -94,8 +101,11 @@ public class CheckPhotoController {
                     break;
             }
             returnNum = 200;
+            log.info("===检验图片  生成文件成功===");
+
         } else {
             returnNum = 0;
+            log.info("===检验图片  生成文件失败===");
         }
 
         return returnNum;

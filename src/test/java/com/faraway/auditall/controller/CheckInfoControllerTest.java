@@ -4,50 +4,33 @@ import com.faraway.auditall.entity.CheckInfo;
 import com.faraway.auditall.entity.CheckInfoReturn;
 import com.faraway.auditall.entity.ProductInfo;
 import com.faraway.auditall.service.imp.CheckInfoServiceImp;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
+import java.io.File;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-@RestController
-@RequestMapping("/check")
-@CrossOrigin  //解决跨域
-public class CheckInfoController {
+import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Slf4j
+class CheckInfoControllerTest {
 
     @Autowired
     private CheckInfoServiceImp checkInfoServiceImp;
 
-
-    @PostMapping("/insert")
-    public int insertOrupddateCheckInfo(@RequestBody CheckInfo checkInfo){
-        return checkInfoServiceImp.insertOrUpdateCheckInfo(checkInfo);
-    }
-
-//    @PostMapping("/testExcel")
-//    @Scheduled(cron = "${dap.checkschedules}")
-//    public int testExcel(){
-//        try {
-//            checkInfoServiceImp.gererateExcel();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (MessagingException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("检验信息生成成功");
-//        return 1;
-//    }
-
-    @GetMapping("/checkInfo")
-    public CheckInfoReturn returnCheckInfo(){
+    @Test
+    void returnCheckInfo() {
         List<CheckInfo> checkInfoList = new ArrayList<>();
         if (checkInfoServiceImp.findAllCheckInfo() != null) {
             checkInfoList = checkInfoServiceImp.findAllCheckInfo();
@@ -59,7 +42,7 @@ public class CheckInfoController {
         int spotCheckNumTemp = 0;
         int spotCheckOkNumTemp = 0;
         int spotCheckNoNumTemp = 0;
-        String checkStatuTemp = "";
+        String checkStatuTemp = null;
         String partNum = null;
 
         if (checkInfoList != null && checkInfoList.size() > 0) {
@@ -79,10 +62,10 @@ public class CheckInfoController {
                 spotCheckNoNumTemp = 0;
                 checkStatuTemp = "";
                 for (int j = 0; j < checkInfoList.size(); j++) {
-                    if (checkInfoList.get(j).getPartNum().equals(partNum)){
+                    if (checkInfoList.get(j).getPartNum().equals(partNum)) {
                         switch (checkInfoList.get(j).getCheckStatu()) {
                             case 1:
-                                checkStatuTemp = "OK";
+                                checkStatuTemp = "Ok";
                                 break;
                             case 2:
                                 checkStatuTemp = "NO";
@@ -94,15 +77,15 @@ public class CheckInfoController {
 
                         switch (checkInfoList.get(j).getCheckType()) {
                             case 1:
-                                if (checkStatuTemp.equals("OK")){
+                                if (checkStatuTemp.equals("OK")) {
                                     spotCheckOkNumTemp++;
-                                }else if(checkStatuTemp.equals("NO")){
+                                } else if (checkStatuTemp.equals("NO")) {
                                     spotCheckNoNumTemp++;
                                 }
                                 spotCheckNumTemp = spotCheckOkNumTemp + spotCheckNoNumTemp;
                                 productInfo.setSpotCheckNum(spotCheckNumTemp);
                                 productInfo.setSpotCheckOkNum(spotCheckOkNumTemp);
-                                productInfo.setSpotCheckNoNum("N"+spotCheckNoNumTemp);
+                                productInfo.setSpotCheckNoNum("N" + spotCheckNoNumTemp);
                                 break;
                             case 2:
                                 productInfo.setFirstCheck(checkStatuTemp);
@@ -125,8 +108,24 @@ public class CheckInfoController {
         }
 
         Calendar calendar = Calendar.getInstance();
-        checkInfoReturn.setCheckDate((calendar.get(Calendar.MONTH)+1)+"月"+calendar.get(Calendar.DAY_OF_MONTH)+"日");
+        checkInfoReturn.setCheckDate((calendar.get(Calendar.MONTH) + 1) + "月" + calendar.get(Calendar.DAY_OF_MONTH) + "日");
+
         checkInfoReturn.setProductInfoList(productInfoTempList);
-        return checkInfoReturn;
+
+    }
+
+    @Test
+    void selectDate() {
+        File file = new File("src/picture");
+        File[] files = file.listFiles();
+        if (files!=null){
+            for (File f : files) {
+                if (f.isFile()){
+                    f.delete();
+                }
+            }
+        }
+
+        System.out.println("文件删除成功");
     }
 }

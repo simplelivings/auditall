@@ -23,4 +23,9 @@ public class AuditInfoController {
     public AuditNum insertOrUpdateAuditInfo(@RequestBody AuditInfo auditInfo) {
         return auditInfoServiceImp.insertOrUpdateAuditInfo(auditInfo);
     }
+
+    @GetMapping(value = "/getnum")
+    public AuditNum getAuditNum(@RequestParam String userName){
+        return auditInfoServiceImp.getAuditNum(userName);
+    }
 }

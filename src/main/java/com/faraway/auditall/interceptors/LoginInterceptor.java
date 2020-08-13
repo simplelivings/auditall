@@ -24,7 +24,9 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         String token = request.getParameter("auditWay");
         String name = request.getParameter("userName");
+        String cc = request.getHeader("token");
         BasicInfo basicInfo = basicInfoServiceImp.findBasicInfoByName(name);
+        System.out.println("====token==="+token);
 
         if (token!=null && token.equals(basicInfo.getToken())){
             return true;

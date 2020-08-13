@@ -56,8 +56,13 @@ class CheckInfoServiceImpTest {
 
     @Test
     public void TestInsert() {
-        checkInfoMapper.delete(null);
-        System.out.println("=====checkInfo数据库清空=====");
+        Date date = new Date();
+        List<CheckInfo> checkInfoList = checkInfoServiceImp.findAllCheckInfo();
+        for (int i = 0; i < checkInfoList.size(); i++) {
+            System.out.println("i++"+i+"=="+checkInfoList.get(i));
+        }
+        System.out.println("=====date====="+date.getTime());
+        System.out.println("====checkInfo=date====="+checkInfoList.get(2).getCreateTime().getTime());
     }
 
 

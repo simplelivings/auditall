@@ -7,6 +7,9 @@ import com.faraway.auditall.service.RegisterInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class RegisterInfoServiceImp implements RegisterInfoService {
 
@@ -46,6 +49,15 @@ public class RegisterInfoServiceImp implements RegisterInfoService {
         }else {
             return null;
         }
+    }
+
+    @Override
+    public List<RegisterInfo> findAllRegister() {
+        List<RegisterInfo> registerInfoList = new ArrayList<>();
+        if (registerInfoMapper.selectList(null)!=null){
+            registerInfoList = registerInfoMapper.selectList(null);
+        }
+        return registerInfoList;
     }
 
 }

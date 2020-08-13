@@ -26,8 +26,6 @@ public class BasicInfoController {
             basicInfo.setAuditNum(auditNum);
             basicInfo.setToken(token);
             basicInfoServiceImp.insertOrUpdateBasicInfo(basicInfo);
-            System.out.println("auditNum========="+auditNum);
-            System.out.println("token=====controlloer===="+token);
             return basicInfo;
         }else{
             return null;

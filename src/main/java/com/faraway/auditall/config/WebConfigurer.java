@@ -33,6 +33,7 @@ public class WebConfigurer implements WebMvcConfigurer {
                         "/register/insert",
                         "/basicinfo/login",
                         "/auditinfo/insert",
+                        "/auditinfo/getnum",
                         "/auditphoto/insert",
                         "/auditphoto/insertandexcel",
                         "/auditinfo/generate",

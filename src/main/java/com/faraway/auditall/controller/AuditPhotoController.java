@@ -56,7 +56,7 @@ public class AuditPhotoController {
         int returnNum = 0;
 
 
-        if (auditPhoto != null) {
+        if (auditPhoto != null&&auditPhoto.getAuditPhotoList()!=null&&auditPhoto.getAuditPhotoList().size()>0) {
             //获得图片src的list
             List<String> tempList = auditPhoto.getAuditPhotoList();
 
@@ -166,7 +166,11 @@ public class AuditPhotoController {
             int numberData = auditPhotoServiceImp.insertOrUpdateAuditPhoto(auditPhoto);
 
             //获得审核者姓名
-            String name = auditPhoto.getUserName();
+            String name = "";
+            if (auditPhoto.getUserName()!=null){
+                name = auditPhoto.getUserName();
+
+            }
 
             //图片Base64解码，并存入服务器
             switch (numberData) {
@@ -209,19 +213,17 @@ public class AuditPhotoController {
                     for (int i = 0; i < 2; i++) {//删除所有对应页码已有文件
                         String fileName = "name" + name + "page" + page + "num" + i + ".jpg";
                         File file = new File(PATH + fileName);
-                        System.out.println("=======controller====default==fileName=======" + file);
                         if (file.exists()) {
                             file.delete();
-                            System.out.println("====controller====default=delete===" + i);
                         }
                     }
                     break;
             }
 
             //最后一页，数据插入excel
-            if (totalNum == auditPhoto.getAuditPage()) {
+//            if (totalNum == auditPhoto.getAuditPage()) {
                 auditInfoServiceImp.generateExcel(auditPhoto);
-            }
+//            }
             returnNum = 200;
         } else {
             returnNum = 0;

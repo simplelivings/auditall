@@ -11,6 +11,7 @@ import com.faraway.auditall.mapper.BasicInfoMapper;
 import com.faraway.auditall.service.AuditInfoService;
 import com.faraway.auditall.service.AuditNameService;
 import com.faraway.auditall.utils.BufferedImageBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
@@ -34,6 +35,7 @@ import java.util.*;
 import java.util.List;
 
 @Service
+@Slf4j
 public class AuditInfoServiceImp implements AuditInfoService {
 
     @Autowired
@@ -58,29 +60,20 @@ public class AuditInfoServiceImp implements AuditInfoService {
     private RegisterInfoServiceImp registerInfoServiceImp;
 
     @Override
-    public AuditNum insertOrUpdateAuditInfo(AuditInfo auditInfo) {
-
+    public AuditNum getAuditNum(String userName) {
         //返回客户端的页码对象
         AuditNum auditNum = new AuditNum();
         int conformNum = 0, unconformNum = 0, finishNum = 0;
-
-        if (auditInfo != null) {
+        if (userName != null) {
             QueryWrapper<AuditInfo> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("auditPage", auditInfo.getAuditPage()).eq("userName", auditInfo.getUserName());
-            AuditInfo auditInfoExist = null;
-            if (auditInfoMapper.selectOne(queryWrapper)!=null){
-                auditInfoExist = auditInfoMapper.selectOne(queryWrapper);
-            }
-
-            QueryWrapper<AuditInfo> queryWrapper1 = new QueryWrapper<>();
-            queryWrapper1.eq("userName", auditInfo.getUserName());
+            queryWrapper.eq("userName", userName);
             List<AuditInfo> auditInfoList = new ArrayList<>();
-            if (auditInfoMapper.selectList(queryWrapper1)!=null){
-                auditInfoList =  auditInfoMapper.selectList(queryWrapper1);
+            if (auditInfoMapper.selectList(queryWrapper) != null) {
+                auditInfoList = auditInfoMapper.selectList(queryWrapper);
             }
 
             //处理符合与不符合数量
-            if (auditInfoList !=null && auditInfoList.size()>0){
+            if (auditInfoList != null && auditInfoList.size() > 0) {
                 for (int i = 0; i < auditInfoList.size(); i++) {
                     if (auditInfoList.get(i).getAuditCon() < 2) {
                         conformNum += auditInfoList.get(i).getAuditCon();
@@ -91,16 +84,57 @@ public class AuditInfoServiceImp implements AuditInfoService {
                     .setFinishNum(auditInfoList.size())
                     .setUnconformNum(auditInfoList.size() - conformNum);
 
+        }
+        return auditNum;
+    }
+
+    @Override
+    public AuditNum insertOrUpdateAuditInfo(AuditInfo auditInfo) {
+
+        //返回客户端的页码对象
+        AuditNum auditNum = new AuditNum();
+        int conformNum = 0, unconformNum = 0, finishNum = 0;
+
+        if (auditInfo != null) {
+            QueryWrapper<AuditInfo> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("auditPage", auditInfo.getAuditPage()).eq("userName", auditInfo.getUserName());
+            AuditInfo auditInfoExist = null;
+            if (auditInfoMapper.selectOne(queryWrapper) != null) {
+                auditInfoExist = auditInfoMapper.selectOne(queryWrapper);
+            }
+
+            QueryWrapper<AuditInfo> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("userName", auditInfo.getUserName());
+
             if (auditInfoExist != null) {
                 auditInfoMapper.update(auditInfo, queryWrapper);
                 System.out.println("==AuditInfoServiceImp==已存在，并更新成功=====");
-                return auditNum;
+
             } else {
                 auditInfoMapper.insert(auditInfo);
                 System.out.println("==AuditInfoServiceImp==插入成功=====");
-                return auditNum;
             }
+
+            List<AuditInfo> auditInfoList = new ArrayList<>();
+            if (auditInfoMapper.selectList(queryWrapper1) != null) {
+                auditInfoList = auditInfoMapper.selectList(queryWrapper1);
+            }
+
+            //处理符合与不符合数量
+            if (auditInfoList != null && auditInfoList.size() > 0) {
+                for (int i = 0; i < auditInfoList.size(); i++) {
+                    if (auditInfoList.get(i).getAuditCon() < 2) {
+                        conformNum += auditInfoList.get(i).getAuditCon();
+                    }
+                }
+            }
+            auditNum.setConformNum(conformNum)
+                    .setFinishNum(auditInfoList.size())
+                    .setUnconformNum(auditInfoList.size() - conformNum);
+
+            return auditNum;
         } else {
+            log.error("===插入分层审核信息失败===");
             return auditNum;
         }
     }
@@ -129,8 +163,11 @@ public class AuditInfoServiceImp implements AuditInfoService {
 
 
         //寻找图片用信息
-        String userName = auditPhoto.getUserName();//用户名
-        if (registerInfoServiceImp.findOneRegisterByName(userName)!=null){
+        String userName = "";
+        if (auditPhoto.getUserName() != null) {
+            userName = auditPhoto.getUserName();//用户名
+        }
+        if (registerInfoServiceImp.findOneRegisterByName(userName) != null) {
             familyName = registerInfoServiceImp.findOneRegisterByName(userName).getFamilyName();//用户名
         }
         int pageNum = 1;//页码编号
@@ -149,7 +186,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
         QueryWrapper<BasicInfo> queryWrapperBasicInfo = new QueryWrapper<>();
         queryWrapperBasicInfo.eq("userName", auditPhoto.getUserName());
         BasicInfo basicInfo = new BasicInfo();
-        if (basicInfoMapper.selectOne(queryWrapperBasicInfo)!=null){
+        if (basicInfoMapper.selectOne(queryWrapperBasicInfo) != null) {
             basicInfo = basicInfoMapper.selectOne(queryWrapperBasicInfo);
         }
 
@@ -157,7 +194,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
         QueryWrapper<AuditItem> queryWrapperAuditItem = new QueryWrapper<>();
         queryWrapperAuditItem.eq("auditNum", auditPhoto.getAuditNum()).orderBy(true, true, "id");
         List<AuditItem> auditItemList = new ArrayList<>();
-        if (auditItemMapper.selectList(queryWrapperAuditItem)!=null){
+        if (auditItemMapper.selectList(queryWrapperAuditItem) != null) {
             auditItemList = auditItemMapper.selectList(queryWrapperAuditItem);
         }
 
@@ -165,11 +202,11 @@ public class AuditInfoServiceImp implements AuditInfoService {
         QueryWrapper<AuditInfo> queryWrapperAuditInfo = new QueryWrapper<>();
         queryWrapperAuditInfo.eq("userName", auditPhoto.getUserName()).orderBy(true, true, "auditPage");
         List<AuditInfo> auditInfoList = new ArrayList<>();
-        if (auditInfoMapper.selectList(queryWrapperAuditInfo)!=null){
+        if (auditInfoMapper.selectList(queryWrapperAuditInfo) != null) {
             auditInfoList = auditInfoMapper.selectList(queryWrapperAuditInfo);
         }
         //计算审核符合率
-        if (auditInfoList!=null && auditInfoList.size()>0){
+        if (auditInfoList != null && auditInfoList.size() > 0) {
             for (int i = 0; i < auditInfoList.size(); i++) {
                 if (auditInfoList.get(i).getAuditCon() == 1) {
                     conformNum++;
@@ -178,7 +215,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
                 }
             }
         }
-        if (conformNum >0 || unconformNum>0){
+        if (conformNum > 0 || unconformNum > 0) {
             conformRatio = (int) ((conformNum / (conformNum + unconformNum)) * 100) + "%";
         }
 
@@ -187,8 +224,8 @@ public class AuditInfoServiceImp implements AuditInfoService {
         QueryWrapper<AuditPhoto> queryWrapperAuditPhoto = new QueryWrapper<>();
         queryWrapperAuditPhoto.eq("userName", auditPhoto.getUserName()).orderBy(true, true, "auditPage");
         List<AuditPhoto> auditPhotoList = new ArrayList<>();
-        if (auditPhotoMapper.selectList(queryWrapperAuditPhoto)!=null){
-           auditPhotoList = auditPhotoMapper.selectList(queryWrapperAuditPhoto);
+        if (auditPhotoMapper.selectList(queryWrapperAuditPhoto) != null) {
+            auditPhotoList = auditPhotoMapper.selectList(queryWrapperAuditPhoto);
         }
 
         long endData = System.currentTimeMillis();
@@ -318,7 +355,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
         cellTitle61.setCellStyle(cellStyleTitle1);
 
         //写入数据至Excel
-        if (auditInfoList!=null && auditInfoList.size()>0){
+        if (auditInfoList != null && auditInfoList.size() > 0) {
 
             for (int i = 0; i < auditInfoList.size(); i++) {
 
@@ -351,7 +388,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
                     cell.setCellStyle(cellStyleContent);
                 }
 
-                if (auditPhotoList!=null && auditPhotoList.size()>0){
+                if (auditPhotoList != null && auditPhotoList.size() > 0) {
                     for (int j = 0; j < auditPhotoList.size(); j++) {
                         if (auditPhotoList.get(j).getAuditPage() == (i + 1)) {
                             if (auditPhotoList.get(j).getPhotoNumber() == 0) {
@@ -394,7 +431,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
                 }
             }
 
-            System.out.println("Excel写入完成！");
+            log.info("===分层审核信息Excel写入完成===");
 
             //数据写入excel
             FileOutputStream fos = new FileOutputStream(excelPath);
@@ -417,7 +454,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
             Thread.sleep(5000);
 
             // 删除所有文件
-            if (auditPhotoList!=null && auditPhotoList.size()>0){
+            if (auditPhotoList != null && auditPhotoList.size() > 0) {
                 for (int i = 0; i < auditPhotoList.size(); i++) {
                     for (int j = 0; j < 2; j++) {
                         String fileName = PATH + "name" + userName + "page" + i + "num" + j + ".jpg";
@@ -439,11 +476,15 @@ public class AuditInfoServiceImp implements AuditInfoService {
             auditInfoMapper.delete(queryWrapperAuditInfo);
             auditPhotoMapper.delete(queryWrapperAuditPhoto);
 
-            System.out.println("删除完成!!!!!!!!!!!!!!!");
-
+            log.info("===分层审核信息 删除完成===");
 
         }
 
+    }
+
+    @Override
+    public void deleteAllAuditInfo() {
+        auditInfoMapper.delete(null);
     }
 
 
@@ -506,6 +547,6 @@ public class AuditInfoServiceImp implements AuditInfoService {
         }
         javaMailSender.send(mimeMessage);
 
-        System.out.println("Email success!!!!!!!!!!!!!!!");
+        log.info("===分层审核信息 邮件发送完成===");
     }
 }

@@ -36,22 +36,4 @@ public class RegisterController {
         return registerServiceImp.insertRegister(registerInfo);
     }
 
-    //发送检验记录
-    @Scheduled(cron = "${dap.checkschedules}")
-    public int testExcel(){
-        try {
-            checkInfoServiceImp.gererateExcel();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("检验信息生成成功");
-        return 1;
-    }
-
-    //清空数据库
-
 }

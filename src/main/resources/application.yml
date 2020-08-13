@@ -5,10 +5,10 @@ spring:
 #    url: jdbc:mysql://39.106.186.110:3306/auditall?serverTimezone=GMT%2B8&useSSL=false
     #部署用：连接远程数据库
     url: jdbc:mysql://localhost:3306/auditall?serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf8
-#    username: fan
-#    password: "06152022"
-    username: root
-    password: 123456
+    username: fan
+    password: "06152022"
+#    username: root
+#    password: 123456
   profiles:
     active: dev
   mail:
@@ -22,6 +22,9 @@ spring:
           port: 587
     default-encoding: utf-8
     protocol: smtp
+  mvc:
+    async:
+      request-timeout: 60000
 
 
 
@@ -41,7 +44,20 @@ server:
       charset: UTF-8
       force: true
       enabled: true
+  tomcat:
+    connection-timeout: 18000000
+    max-connections: 30000
+    max-swallow-size: 100MB
 
 dap:
-  checkschedules: 0 50 7 * * *
+  checkschedules: 0 45 7 * * *
   dateschedules: 0 50 7 * * *
+
+logging:
+  file:
+    name: auditLog.log
+    max-history: 3
+  level:
+    root: info
+
+

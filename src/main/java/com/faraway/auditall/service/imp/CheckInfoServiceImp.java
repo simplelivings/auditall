@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.faraway.auditall.entity.AuditName;
 import com.faraway.auditall.entity.CheckInfo;
 import com.faraway.auditall.entity.CheckPhoto;
+import com.faraway.auditall.entity.RegisterInfo;
 import com.faraway.auditall.mapper.CheckInfoMapper;
 import com.faraway.auditall.service.AuditNameService;
 import com.faraway.auditall.service.CheckInfoService;
 import com.faraway.auditall.utils.BufferedImageBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
@@ -32,6 +34,7 @@ import java.util.*;
 import java.util.List;
 
 @Service
+@Slf4j
 public class CheckInfoServiceImp implements CheckInfoService {
 
     @Autowired
@@ -63,35 +66,37 @@ public class CheckInfoServiceImp implements CheckInfoService {
     }
 
     /*
-    * 判断思路：
-    * 根据用户名、零件号、检验类型、生产数量、生产时间，来判断数据库中是否有数据；
-    * -生产时间，由小时和分钟的十位组成，如此可在短期内更新错误输入状态；
-    *  并防止一个产品在不同时间段生产时，将前面数据覆盖；
-    * -生产日期，为自动生成，用于插入excel时用；
-    * */
+     * 判断思路：
+     * 根据用户名、零件号、检验类型、生产数量、生产时间，来判断数据库中是否有数据；
+     * -生产时间，由小时和分钟的十位组成，如此可在短期内更新错误输入状态；
+     *  并防止一个产品在不同时间段生产时，将前面数据覆盖；
+     * -生产日期，为自动生成，用于插入excel时用；
+     * */
 
     @Override
     public int insertOrUpdateCheckInfo(CheckInfo checkInfo) {
-        if (checkInfo!=null){
+        if (checkInfo != null) {
+            checkInfo.setCreateTime(new Date());
             QueryWrapper<CheckInfo> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("userName",checkInfo.getUserName())
-                    .eq("partNum",checkInfo.getPartNum())
-                    .eq("checkType",checkInfo.getCheckType())
-                    .eq("productNum",checkInfo.getProductNum())
-                    .eq("produceTime",checkInfo.getProduceTime());
+            queryWrapper.eq("userName", checkInfo.getUserName())
+                    .eq("partNum", checkInfo.getPartNum())
+                    .eq("checkType", checkInfo.getCheckType())
+                    .eq("productNum", checkInfo.getProductNum())
+                    .eq("produceTime", checkInfo.getProduceTime());
             CheckInfo checkInfoExist = null;
-            if (checkInfoMapper.selectOne(queryWrapper)!=null){
-                checkInfoExist =  checkInfoMapper.selectOne(queryWrapper);
+            if (checkInfoMapper.selectOne(queryWrapper) != null) {
+                checkInfoExist = checkInfoMapper.selectOne(queryWrapper);
             }
 
-            if (checkInfoExist!=null){
-                checkInfoMapper.update(checkInfo,queryWrapper);
+            if (checkInfoExist != null) {
+                checkInfoMapper.update(checkInfo, queryWrapper);
                 return 1;
-            }else{
+            } else {
                 checkInfoMapper.insert(checkInfo);
                 return 2;
             }
-        }else {
+        } else {
+            log.error("===插入检验信息失败===");
             return 0;
         }
     }
@@ -216,7 +221,7 @@ public class CheckInfoServiceImp implements CheckInfoService {
         }
 
         sheet.setColumnWidth(1, 256 * 15);//设置列宽
-        sheet.setColumnWidth(9, 256 * 15);
+        sheet.setColumnWidth(8, 256 * 15);
 
         if (checkInfoList != null && checkInfoList.size() > 0) {
 
@@ -295,10 +300,10 @@ public class CheckInfoServiceImp implements CheckInfoService {
                         //依据零件号 生产时间 检验类型来插入图片
                         if ((checkPhotoList.get(j).getPartNum().equals(checkInfoList.get(i).getPartNum()))
                                 && (checkPhotoList.get(j).getProduceTime().equals(checkInfoList.get(i).getProduceTime()))
-                                &&(checkPhotoList.get(j).getCheckType().equals(checkInfoList.get(i).getCheckType()))) {
+                                && (checkPhotoList.get(j).getCheckType().equals(checkInfoList.get(i).getCheckType()))) {
                             //插入第一张照片
                             if (checkPhotoList.get(j).getPhotoNumber() == 0) {
-                                String pathPictrue = "src/picture/" + checkPhotoList.get(j).getPartNum() + "type" + checkPhotoList.get(j).getCheckType() + "num" + 0 + "p"+checkPhotoList.get(j).getProduceTime()+".jpg";
+                                String pathPictrue = "src/picture/" + checkPhotoList.get(j).getPartNum() + "type" + checkPhotoList.get(j).getCheckType() + "num" + 0 + "p" + checkPhotoList.get(j).getProduceTime() + ".jpg";
                                 File file = new File(pathPictrue);
                                 if (file.exists()) {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -314,7 +319,7 @@ public class CheckInfoServiceImp implements CheckInfoService {
                                     }
                                 }
                             } else if (checkPhotoList.get(j).getPhotoNumber() == 1) {//插入第二张照片（实际并未使用）
-                                String pathPictrue = "src/picture/" + checkPhotoList.get(j).getPartNum() + "type" + checkPhotoList.get(j).getCheckType() + "num" + 1 + "p"+checkPhotoList.get(j).getProduceTime()+".jpg";
+                                String pathPictrue = "src/picture/" + checkPhotoList.get(j).getPartNum() + "type" + checkPhotoList.get(j).getCheckType() + "num" + 1 + "p" + checkPhotoList.get(j).getProduceTime() + ".jpg";
                                 File file = new File(pathPictrue);
                                 if (file.exists()) {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -330,17 +335,13 @@ public class CheckInfoServiceImp implements CheckInfoService {
                                         bos.close();
                                     }
                                 }
-
                             }
                         }
                     }
                 }
-
-
             }
 
-
-            System.out.println("Excel写入完成！");
+            log.info("===检验 Excel写入完成===");
 
             //数据写入excel
             FileOutputStream fos = new FileOutputStream(excelPath);
@@ -355,11 +356,32 @@ public class CheckInfoServiceImp implements CheckInfoService {
             ((SXSSFWorkbook) workbook).dispose();
 
             long endExcel = System.currentTimeMillis();
-//        emailFile("检验记录" + shortDate , excelPath,null);
+            emailFile("检验记录" + shortDate, excelPath);
 
-            System.out.println("=========excel=time=======" + (double) (endExcel - beginExcel) / 1000);
+            log.info("===excel=time===" + (double) (endExcel - beginExcel) / 1000);
 
-            Thread.sleep(5000);
+
+            Thread.sleep(10000);
+
+            // 删除所有文件
+            if (checkPhotoList != null && checkPhotoList.size() > 0) {
+                for (int i = 0; i < checkPhotoList.size(); i++) {
+                    for (int j = 0; j < 2; j++) {
+                        String fileName = PATH + checkPhotoList.get(i).getPartNum() + "type" + checkPhotoList.get(i).getCheckType() + "num" + j + "p" + checkPhotoList.get(i).getProduceTime() + ".jpg";
+                        File file = new File(fileName);
+                        if (file.exists()) {
+                            file.delete();
+                        }
+                    }
+                }
+            }
+
+            File file = new File(excelPath);
+            if (file.exists()) {
+                file.delete();
+            }
+
+            log.info("===删除检验信息完成===");
 
         }
 
@@ -367,7 +389,7 @@ public class CheckInfoServiceImp implements CheckInfoService {
 
 
     //发送邮件的方法
-    public void emailFile(String fileName, String path, String userName) throws MessagingException, UnsupportedEncodingException {
+    public void emailFile(String fileName, String path) throws MessagingException, UnsupportedEncodingException {
 
         //1、创建一个复杂的邮件
         System.setProperty("mail.mime.charset", "UTF-8");
@@ -392,17 +414,25 @@ public class CheckInfoServiceImp implements CheckInfoService {
             }
         }
 
-        String tempReciever = null;
-        if (registerInfoServiceImp.findOneRegisterByName(userName) != null) {
-            tempReciever = registerInfoServiceImp.findOneRegisterByName(userName).getEmailAddress();
+        List<RegisterInfo> registerInfoList = new ArrayList<>();
+        if (registerInfoServiceImp.findAllRegister()!=null){
+          registerInfoList = registerInfoServiceImp.findAllRegister();
         }
-        if (tempReciever != null && tempReciever.length() > 0) {
-            tempReceiverList.add(tempReciever);
+
+        if (registerInfoList!=null && registerInfoList.size()>0){
+            for (int i = 0; i < registerInfoList.size(); i++) {
+                if (registerInfoList.get(i).getUserRight()==1){
+                    tempReceiverList.add(registerInfoList.get(i).getEmailAddress());
+                }
+            }
         }
 
 
         //邮件接收人的数组
         String[] receiverList = tempReceiverList.toArray(new String[0]);
+        for (String s : receiverList) {
+            System.out.println("ss====="+s);
+        }
 
         //邮件内容
         helper.setText("检验记录", true);
@@ -421,6 +451,7 @@ public class CheckInfoServiceImp implements CheckInfoService {
         }
         javaMailSender.send(mimeMessage);
 
-        System.out.println("Email success!!!!!!!!!!!!!!!");
+        log.info("===检验信息邮件，发送完成===");
+
     }
 }
