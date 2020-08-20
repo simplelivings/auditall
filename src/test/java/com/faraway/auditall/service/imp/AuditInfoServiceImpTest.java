@@ -16,5 +16,6 @@ class AuditInfoServiceImpTest {
     @Test
     void cleanDataBase() {
         auditInfoMapper.delete(null);
+        System.out.println("数据删除成功");
     }
 }

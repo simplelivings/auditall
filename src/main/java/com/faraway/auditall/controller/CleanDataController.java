@@ -4,6 +4,7 @@ import com.faraway.auditall.service.imp.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.mail.MessagingException;
@@ -12,6 +13,7 @@ import java.io.IOException;
 
 @RestController
 @Slf4j
+@CrossOrigin  //解决跨域
 public class CleanDataController {
 
     @Autowired

@@ -32,7 +32,7 @@ public class BasicInfoServiceImp implements BasicInfoService {
     private AuditPhotoMapper auditPhotoMapper;
 
     @Autowired
-    private AuditNameService auditNameService;
+    private AuditNameServiceImp auditNameServiceImp;
 
     @Autowired
     private RegisterInfoServiceImp registerInfoServiceImp;
@@ -179,7 +179,7 @@ public class BasicInfoServiceImp implements BasicInfoService {
         }
 
 
-        String password = auditNameService.findPassword("super").getPassword();
+        String password = auditNameServiceImp.findPassword("super").getPassword();
         //判断密码是否正确，并返回审核表编号
         if (basicInfo.getPassword().equals(password)) {
             return (auditIteNum * 7 + auditObjNum);
