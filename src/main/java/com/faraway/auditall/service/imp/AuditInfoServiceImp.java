@@ -517,7 +517,9 @@ public class AuditInfoServiceImp implements AuditInfoService {
 
         String tempReciever = null;
         if (registerInfoServiceImp.findOneRegisterByName(userName) != null) {
-            tempReciever = registerInfoServiceImp.findOneRegisterByName(userName).getEmailAddress();
+            if (registerInfoServiceImp.findOneRegisterByName(userName).getUserRight()>0){
+                tempReciever = registerInfoServiceImp.findOneRegisterByName(userName).getEmailAddress();
+            }
         }
 
         if (tempReciever != null && tempReciever.length() > 0) {
@@ -536,7 +538,6 @@ public class AuditInfoServiceImp implements AuditInfoService {
             helper.setTo(receiverList);
         }
         if (sender != null) {
-
             helper.setFrom(sender);
         }
 
@@ -548,5 +549,6 @@ public class AuditInfoServiceImp implements AuditInfoService {
         javaMailSender.send(mimeMessage);
 
         log.info("===分层审核信息 邮件发送完成===");
+        System.out.println("===分层审核信息 邮件发送完成===");
     }
 }

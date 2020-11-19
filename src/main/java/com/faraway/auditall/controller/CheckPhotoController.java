@@ -33,7 +33,7 @@ public class CheckPhotoController {
 
         //返回值
         int returnNum = 0;
-        if (checkPhoto!=null){
+        if (checkPhoto!=null && checkPhoto.getUserName()!=null && checkPhoto.getUserName().length()>0 && checkPhoto.getCheckPhotoList()!=null && checkPhoto.getCheckPhotoList().size()>0){
             //获得图片src的list
             List<String> tempList = checkPhoto.getCheckPhotoList();
 

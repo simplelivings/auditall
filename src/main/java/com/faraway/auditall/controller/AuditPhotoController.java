@@ -42,7 +42,7 @@ public class AuditPhotoController {
     @Autowired
     private AuditInfoServiceImp auditInfoServiceImp;
 
-    @PostMapping("/insert")
+    @PostMapping(value = "/insert")
     public int insertAuditPhoto(@RequestBody AuditPhoto auditPhoto) throws IOException, MessagingException, InterruptedException {
 
         //图片存放路径
@@ -55,8 +55,7 @@ public class AuditPhotoController {
         //返回值
         int returnNum = 0;
 
-
-        if (auditPhoto != null&&auditPhoto.getAuditPhotoList()!=null&&auditPhoto.getAuditPhotoList().size()>0) {
+        if (auditPhoto != null&&auditPhoto.getAuditPhotoList()!=null&&auditPhoto.getAuditPhotoList().size()>0&&auditPhoto.getUserName()!=null&&auditPhoto.getUserName().length()>0) {
             //获得图片src的list
             List<String> tempList = auditPhoto.getAuditPhotoList();
 
@@ -151,8 +150,9 @@ public class AuditPhotoController {
         //返回值
         int returnNum = 0;
 
+        System.out.println("==========auditPhotoController==========="+auditPhoto.getUserName());
 
-        if (auditPhoto != null) {
+        if (auditPhoto != null&&auditPhoto.getAuditPhotoList()!=null&&auditPhoto.getAuditPhotoList().size()>0&&auditPhoto.getUserName()!=null&&auditPhoto.getUserName().length()>0) {
             //获得图片src的list
             List<String> tempList = new ArrayList<>();
             if (auditPhoto.getAuditPhotoList()!=null && auditPhoto.getAuditPhotoList().size()>0){

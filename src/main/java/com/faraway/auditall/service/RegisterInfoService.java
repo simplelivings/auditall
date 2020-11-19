@@ -2,6 +2,7 @@ package com.faraway.auditall.service;
 
 import com.faraway.auditall.entity.RegisterInfo;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 public interface RegisterInfoService {
@@ -12,4 +13,9 @@ public interface RegisterInfoService {
     public RegisterInfo findOneRegisterByName(String userName);
 
     public List<RegisterInfo> findAllRegister();
+
+    public void sendEmailHyperLinks(String userName) throws MessagingException;
+
+    public int updateRegister(RegisterInfo registerInfo);
+
 }

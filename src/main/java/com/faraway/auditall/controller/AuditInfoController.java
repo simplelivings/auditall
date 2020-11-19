@@ -21,7 +21,12 @@ public class AuditInfoController {
 
     @PostMapping(value = "/insert")
     public AuditNum insertOrUpdateAuditInfo(@RequestBody AuditInfo auditInfo) {
-        return auditInfoServiceImp.insertOrUpdateAuditInfo(auditInfo);
+        AuditNum auditNum = new AuditNum();
+        if (auditInfo!=null && auditInfo.getUserName()!=null && auditInfo.getUserName().length()>0){
+            return auditInfoServiceImp.insertOrUpdateAuditInfo(auditInfo);
+        }else{
+            return auditNum;
+        }
     }
 
     @GetMapping(value = "/getnum")

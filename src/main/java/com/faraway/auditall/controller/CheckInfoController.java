@@ -27,7 +27,12 @@ public class CheckInfoController {
 
     @PostMapping("/insert")
     public int insertOrupddateCheckInfo(@RequestBody CheckInfo checkInfo){
-        return checkInfoServiceImp.insertOrUpdateCheckInfo(checkInfo);
+        System.out.println("=========checkInfo========"+checkInfo.getUserName());
+        if (checkInfo!=null && checkInfo.getUserName()!=null&&checkInfo.getUserName().length()>0){
+            return checkInfoServiceImp.insertOrUpdateCheckInfo(checkInfo);
+        }else{
+            return -1;
+        }
     }
 
 //    @PostMapping("/testExcel")

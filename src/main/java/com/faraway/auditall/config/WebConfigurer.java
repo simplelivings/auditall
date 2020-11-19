@@ -12,6 +12,13 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+
+/**
+ *
+ * 配置拦截器，除注册、登录、退出、更新分层审核项目外，其余请求全部拦截；
+ */
+
+
 @Configuration
 public class WebConfigurer implements WebMvcConfigurer {
 
@@ -24,19 +31,18 @@ public class WebConfigurer implements WebMvcConfigurer {
     }
 
     @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").exposedHeaders("token");
+    }
+
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/register/find",
-                        "/register/insert",
-                        "/basicinfo/login",
-                        "/auditinfo/insert",
-                        "/auditphoto/insert",
-                        "/auditphoto/insertandexcel",
-                        "/auditinfo/generate",
-                        "/basicinfo/superlogin",
+                        "/register/*",
+                        "/basicinfo/*",
                         "/audititem/insert",
                         "/check/checkInfo",
                         "/check/insert",

@@ -29,11 +29,36 @@ public class RegisterController {
         }else {
             return -1;
         }
-    };
+    }
+
+    @GetMapping("/emailVal")
+    public int validateEmailAddress(@RequestParam("userName") String userName, @RequestParam("emailAddress") String emailAddress) throws MessagingException {
+        if (userName!=null && userName.length()>0){
+            RegisterInfo registerInfo = registerServiceImp.findOneRegisterByName(userName);
+            if (registerInfo!=null && registerInfo.getEmailAddress().equals(emailAddress)){
+                System.out.println("===============ps=validate========================"+registerInfo.getEmailAddress().equals(emailAddress));
+                registerServiceImp.sendEmailHyperLinks(userName);
+                return 1;
+            }else {
+                return -1;
+            }
+        }else {
+            return -1;
+        }
+    }
 
     @PostMapping("/insert")
     public int insertRegister(@RequestBody RegisterInfo registerInfo){
         return registerServiceImp.insertRegister(registerInfo);
+    }
+
+    @PostMapping("/update")
+    public int updateTegister(@RequestBody RegisterInfo registerInfo){
+        if (registerInfo!=null){
+            return registerServiceImp.updateRegister(registerInfo);
+        }else{
+            return -1;
+        }
     }
 
 }

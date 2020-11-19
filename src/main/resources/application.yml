@@ -4,7 +4,7 @@ spring:
     #测试用连接远程数据库
 #    url: jdbc:mysql://39.106.186.110:3306/auditall?serverTimezone=GMT%2B8&useSSL=false
     #部署用：连接远程数据库
-    url: jdbc:mysql://localhost:3306/auditall?serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://localhost:3306/auditall?serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true
 #    username: fan
 #    password: "06152022"
     username: root
@@ -25,7 +25,11 @@ spring:
   mvc:
     async:
       request-timeout: 60000
-
+  redis:
+#    host: 127.0.0.1
+    host: 39.106.186.110
+    port: 6379
+    password: 06152022ss
 
 
 mybatis-plus:
@@ -36,6 +40,8 @@ mybatis-plus:
     db-config:
       logic-delete-value: 1
       logic-not-delete-value: 0
+
+
 
 server:
   port: 8800
@@ -60,6 +66,10 @@ logging:
     max-history: 3
   level:
     root: info
+
+selfDefination:
+  emailSender: 593931651@qq.com
+  validateAddress: http://localhost:8080/validate
 
 
 

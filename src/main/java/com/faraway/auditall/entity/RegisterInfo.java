@@ -28,6 +28,7 @@ public class RegisterInfo {
 
     private Integer userRight;
 
+
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
