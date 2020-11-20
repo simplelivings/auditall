@@ -28,6 +28,9 @@ public class RegisterInfo {
 
     private Integer userRight;
 
+    private Integer registerStatue;
+
+    private String corpName;
 
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;

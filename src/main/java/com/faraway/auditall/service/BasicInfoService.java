@@ -12,4 +12,5 @@ public interface BasicInfoService {
     public void deleteAllBasicInfo();
     public BasicInfo findBasicInfoByName(String name);
     public int deleteTempData(String userName);
+    public int checkRegisterStatus(String userName);
 }

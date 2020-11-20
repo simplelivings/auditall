@@ -43,10 +43,11 @@ public class WebConfigurer implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/register/*",
                         "/basicinfo/*",
-                        "/audititem/insert",
-                        "/check/checkInfo",
-                        "/check/insert",
-                        "/checkphoto/insert",
-                        "/check/testExcel");
+                        "/audititem/insert"
+//                        "/check/checkInfo",
+//                        "/check/insert",
+//                        "/checkphoto/insert",
+//                        "/check/testExcel"
+                );
     }
 }

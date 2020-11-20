@@ -26,8 +26,7 @@ public class CheckInfoController {
 
 
     @PostMapping("/insert")
-    public int insertOrupddateCheckInfo(@RequestBody CheckInfo checkInfo){
-        System.out.println("=========checkInfo========"+checkInfo.getUserName());
+    public int insertOrUpdateCheckInfo(@RequestBody CheckInfo checkInfo){
         if (checkInfo!=null && checkInfo.getUserName()!=null&&checkInfo.getUserName().length()>0){
             return checkInfoServiceImp.insertOrUpdateCheckInfo(checkInfo);
         }else{
@@ -35,21 +34,7 @@ public class CheckInfoController {
         }
     }
 
-//    @PostMapping("/testExcel")
-//    @Scheduled(cron = "${dap.checkschedules}")
-//    public int testExcel(){
-//        try {
-//            checkInfoServiceImp.gererateExcel();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (MessagingException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("检验信息生成成功");
-//        return 1;
-//    }
+
 
     @GetMapping("/checkInfo")
     public CheckInfoReturn returnCheckInfo(){
