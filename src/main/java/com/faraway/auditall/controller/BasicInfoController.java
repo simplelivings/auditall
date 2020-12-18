@@ -8,6 +8,7 @@ import com.faraway.auditall.entity.BasicInfo;
 import com.faraway.auditall.mapper.AuditInfoMapper;
 import com.faraway.auditall.mapper.AuditPhotoMapper;
 import com.faraway.auditall.mapper.BasicInfoMapper;
+import com.faraway.auditall.service.imp.AuditNameServiceImp;
 import com.faraway.auditall.service.imp.BasicInfoServiceImp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class BasicInfoController {
     private BasicInfoServiceImp basicInfoServiceImp;
 
     @Autowired
+    private AuditNameServiceImp auditNameServiceImp;
+
+    @Autowired
     private RedisTemplate redisTemplate;
 
 
@@ -43,6 +47,35 @@ public class BasicInfoController {
 
             //获取审核表单的num
             int auditNum = basicInfoServiceImp.findAuditNum(basicInfo);
+            basicInfo.setAuditNum(auditNum);
+
+            //生成token
+            String token = UUID.randomUUID() + "";
+
+            //token放入redis中，key为用户名,有效期为60分钟；
+            redisTemplate.opsForValue().set(basicInfo.getUserName(),token,60, TimeUnit.MINUTES);
+
+            //不存在已登录用户，或用户信息输入正确后，数据插入数据库
+            if (auditNum<100 && auditNum!=-1){
+                basicInfoServiceImp.insertOrUpdateBasicInfo(basicInfo);
+            }
+
+            //token放入响应头中，服务端接收并存储至localStorage中
+            response.setHeader("token",token);
+            return basicInfo;
+        } else {
+            return null;
+        }
+    }
+
+    //接收login页面请求数据，返回审核表单的num
+    @PostMapping("/jxLogin")
+    public BasicInfo findJxAuditNum(@RequestBody BasicInfo basicInfo, HttpServletResponse response) {
+
+        if (basicInfo != null) {
+
+            //获取审核表单的num
+            int auditNum = basicInfoServiceImp.findJxAuditNum(basicInfo);
             basicInfo.setAuditNum(auditNum);
 
             //生成token
@@ -72,6 +105,39 @@ public class BasicInfoController {
             return basicInfoServiceImp.findAuditNumSuper(basicInfo);
         } else {
             return -1;
+        }
+    }
+
+    //超级检查用户登录
+    @PostMapping("/superCheckLogin")
+    public BasicInfo superCheckLogin(@RequestBody BasicInfo basicInfo, HttpServletResponse response) {
+        if (basicInfo != null && basicInfo.getPassword()!=null && basicInfo.getUserName()!=null && basicInfo.getUserName().length() > 0) {
+
+            basicInfo.setAuditNum(10);
+
+            //生成token
+            String token = UUID.randomUUID() + "";
+
+            //token放入redis中，key为用户名,有效期为30分钟；
+            redisTemplate.opsForValue().set(basicInfo.getUserName(),token,30, TimeUnit.MINUTES);
+
+            System.out.println("=========username========"+ basicInfo.getUserName());
+
+            //token放入响应头中，服务端接收并存储至localStorage中
+            response.setHeader("token",token);
+
+            String password="1";
+            if (auditNameServiceImp.findPassword(basicInfo.getUserName())!=null){
+                password = auditNameServiceImp.findPassword(basicInfo.getUserName()).getPassword();
+            }
+            //判断密码是否正确，并返回审核表编号
+            if (basicInfo.getPassword().equals(password)) {
+                return basicInfo;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 

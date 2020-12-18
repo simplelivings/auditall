@@ -8,35 +8,34 @@ import lombok.experimental.Accessors;
 
 import java.util.Date;
 
+/**
+ * TODO
+ *
+ * @version: 1.0
+ * @author: faraway
+ * @date: 2020-11-21 11:29
+ */
 @Data
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "registerinfo")
-public class RegisterInfo {
+@TableName(value = "inspectinfo")
+public class InspectInfo {
 
     @TableId(type = IdType.AUTO)
     private Integer id;
 
     private String userName;
 
-    private String password;
+    private String auditFind;
 
-    private String userPhone;
+    private String auditCharger;
 
-    private String userId;
+    private Integer auditCon;
 
-    private String familyName;
+    private Integer auditPage;
 
-    private String emailAddress;
-
-    private String recEmail;
-
-    private Integer userRight;
-
-    private Integer registerStatue;
-
-    private String corpName;
+    private Integer auditPicStatue;
 
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;

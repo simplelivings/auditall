@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +18,9 @@ class RegisterInfoServiceImpTest {
 
     @Autowired
     private RegisterInfoMapper registerInfoMapper;
+
+    @Autowired
+    private RegisterInfoServiceImp registerInfoServiceImp;
 
     @Test
     void findRegisterInfoByName() {
@@ -34,5 +38,20 @@ class RegisterInfoServiceImpTest {
 //        int i = df.format(date) - df.format(registerInfo.getCreateTime());
         System.out.println("====register time====="+registerInfo.getCreateTime());
         System.out.println("====date====="+date);
+    }
+
+    @Test
+    void checkRegisterStatue(){
+        List<RegisterInfo> registerInfoList = registerInfoServiceImp.findAllRegister();
+        for (RegisterInfo registerInfo : registerInfoList) {
+            if (registerInfo.getRegisterStatue() > 0){
+                Long registerTime = Math.round((new Date().getTime() - registerInfo.getUpdateTime().getTime()) /86400000/30+0d);
+                if (registerTime > 12){
+                    registerInfo.setRegisterStatue(0);
+                    registerInfoServiceImp.updateRegister(registerInfo);
+                }
+            }
+        }
+
     }
 }

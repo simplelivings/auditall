@@ -1,14 +1,20 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #测试用连接远程数据库
-#    url: jdbc:mysql://39.106.186.110:3306/auditall?serverTimezone=GMT%2B8&useSSL=false
-    #部署用：连接远程数据库
+    #测试用:本地数据库
     url: jdbc:mysql://localhost:3306/auditall?serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true
-#    username: fan
-#    password: "06152022"
     username: root
     password: 123456
+
+    #部署用：连接远程数据库
+    #    url: jdbc:mysql://39.106.186.110:3306/auditall?serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    #    username: fan
+    #    password: "06152022"
+
+    #部署用：阿里云数据库
+#    url: jdbc:mysql://rm-bp179ijtwt8jyh5tdio.mysql.rds.aliyuncs.com:3306/auditall?&serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true
+#    username: fanmysql
+#    password: 06152022sS
   profiles:
     active: dev
   mail:
@@ -27,7 +33,8 @@ spring:
       request-timeout: 60000
   redis:
 #    host: 127.0.0.1
-    host: 39.106.186.110
+    #    host: 39.106.186.110
+    host: 101.200.121.0
     port: 6379
     password: 06152022ss
 
@@ -54,6 +61,8 @@ server:
     connection-timeout: 18000000
     max-connections: 30000
     max-swallow-size: 100MB
+    resource:
+      allow-caching: false
 
 
 dap:
@@ -69,7 +78,7 @@ logging:
 
 selfDefination:
   emailSender: 593931651@qq.com
-  validateAddress: http://localhost:8080/validate
+  validateAddress: http://www.auditall.cn/validate
 
 
 

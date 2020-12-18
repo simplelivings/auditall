@@ -18,4 +18,10 @@ public interface RegisterInfoService {
 
     public int updateRegister(RegisterInfo registerInfo);
 
+    public int findRegisterByPhone(String phone);
+
+    public int findRegisterByUserId(String userId);
+
+    public int deleteRegisterByName(String userName);
+
 }

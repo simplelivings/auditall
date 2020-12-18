@@ -44,6 +44,43 @@ public class RegisterInfoServiceImp implements RegisterInfoService {
     }
 
     @Override
+    public int findRegisterByPhone(String phone) {
+        QueryWrapper<RegisterInfo> registerInfoQueryWrapper = new QueryWrapper<>();
+        registerInfoQueryWrapper.eq("userPhone",phone);
+        if (registerInfoMapper.selectCount(registerInfoQueryWrapper)>0){
+            System.out.println("register-手机号已存在");
+            return -1;
+        }else {
+            return 100;
+        }
+    }
+
+    @Override
+    public int findRegisterByUserId(String userId) {
+        QueryWrapper<RegisterInfo> registerInfoQueryWrapper = new QueryWrapper<>();
+        registerInfoQueryWrapper.eq("userId",userId);
+        if (registerInfoMapper.selectCount(registerInfoQueryWrapper)>0){
+            System.out.println("register-身份证号已存在");
+            return -1;
+        }else {
+            return 100;
+        }
+    }
+
+    @Override
+    public int deleteRegisterByName(String userName) {
+        if (userName !=null ){
+            QueryWrapper<RegisterInfo> registerInfoQueryWrapper = new QueryWrapper<>();
+            registerInfoQueryWrapper.eq("userName",userName);
+            registerInfoMapper.delete(registerInfoQueryWrapper);
+            return 1;
+        }else {
+            return -1;
+        }
+    }
+
+
+    @Override
     public int insertRegister(RegisterInfo registerInfo) {
         if (registerInfo!=null){
             registerInfoMapper.insert(registerInfo);
