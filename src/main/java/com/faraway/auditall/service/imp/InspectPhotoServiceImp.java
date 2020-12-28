@@ -26,19 +26,29 @@ public class InspectPhotoServiceImp implements InspectPhotoService {
     @Autowired
     private InspectPhotoMapper inspectPhotoMapper;
 
+    /**
+     *
+     * @param inspectPhoto
+     * @return
+     *
+     * 图片插入或更新至数据库
+     * 1 根据用户名和审核页码，新建查询条件；
+     * 2 获得用户名，审核页面信息
+     * 3 依据图片数量，先删除已有数据，并将信息存入数据库中
+     *   图片编号：0为第一张图片，1位第二张图片
+     */
+
     @Override
     public int insertOrUpdateInspectPhoto(InspectPhoto inspectPhoto) {
+        String userName = "";
+        int auditPage = 0;
+
         QueryWrapper<InspectPhoto> queryWrapper = new QueryWrapper<>();
-        //根据用户名和审核页码，新建查询条件；
+        //1 根据用户名和审核页码，新建查询条件；
         queryWrapper.eq("userName", inspectPhoto.getUserName()).eq("auditPage",inspectPhoto.getAuditPage());
         int photoNumbers = inspectPhoto.getAuditPhotoList().size();//前端回传图片数量
 
-        log.info("===分层审核图片  photoNumbers==="+photoNumbers);
-
-        QueryWrapper<InspectPhoto> queryWrapper1 = new QueryWrapper<>();
-        queryWrapper1.eq("userName", inspectPhoto.getUserName());
-        String userName = "";
-        int auditPage = 0;
+        //2 获得用户名，审核页面信息
         if (inspectPhoto.getUserName()!=null){
             userName = inspectPhoto.getUserName();
         }
@@ -46,6 +56,7 @@ public class InspectPhotoServiceImp implements InspectPhotoService {
             auditPage = inspectPhoto.getAuditPage();
         }
 
+        //3 依据图片数量，先删除已有数据，并将数据存入数据库中
         switch (photoNumbers) {
             case 2://前端返回图片数量为2
                 inspectPhotoMapper.delete(queryWrapper);//清空符合条件数据库中数据
@@ -69,8 +80,6 @@ public class InspectPhotoServiceImp implements InspectPhotoService {
                 inspectPhotoMapper.delete(queryWrapper);//清空符合条件数据库中数据
                 break;
         }
-//        List<In> auditPhotoList = inspectPhotoMapper.selectList(queryWrapper1);
-
         log.info("===分层审核图片  成功插入数据库===");
         return photoNumbers;
     }

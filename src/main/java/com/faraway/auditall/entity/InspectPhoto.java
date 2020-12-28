@@ -41,7 +41,7 @@ public class InspectPhoto {
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 
-//    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
 
     @Version

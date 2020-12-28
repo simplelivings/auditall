@@ -24,7 +24,7 @@ public class InspectInfoController {
     @PostMapping(value = "/insert")
     public int issertOrUpdateInspectInfo(@RequestBody InspectInfo inspectInfo) {
         if (inspectInfo != null) {
-            //检查发现或者图片不为空，则把数据写入数据库中
+            //检查发现不为空，则把数据写入数据库中
             if ((inspectInfo.getAuditFind() != null && inspectInfo.getAuditFind().length() > 0)
                     || (inspectInfo.getAuditCon() != null && inspectInfo.getAuditCon() > 0)
                     || (inspectInfo.getAuditCharger() != null && inspectInfo.getAuditCharger().length() > 0)

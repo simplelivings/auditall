@@ -29,6 +29,7 @@ public class SuperRegisterController {
             registerInfo = registerServiceImp.findOneRegisterByName(checkName);
             return registerInfo;
         } else {
+//            registerInfo.setReturnNum("wrong");
             return registerInfo;
         }
     }
@@ -62,10 +63,15 @@ public class SuperRegisterController {
                 for (String tempName : tempNames) {
                     RegisterInfo registerInfo = new RegisterInfo();
                     registerInfo = registerServiceImp.findOneRegisterByName(tempName);
-                    registerInfo.setUserRight(tempRight);
-                    registerServiceImp.updateRegister(registerInfo);
+                    if (registerInfo!=null){
+                        registerInfo.setUserRight(tempRight);
+                        registerServiceImp.updateRegister(registerInfo);
+                        return 2;
+                    }else {
+                        return -1;
+                    }
                 }
-                return 2;
+                return -1;
             } else {
                 for (String tempName : tempNames) {
                     registerServiceImp.deleteRegisterByName(tempName);

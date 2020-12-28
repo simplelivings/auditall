@@ -15,25 +15,39 @@ spring:
 #    url: jdbc:mysql://rm-bp179ijtwt8jyh5tdio.mysql.rds.aliyuncs.com:3306/auditall?&serverTimezone=GMT%2B8&useSSL=false&useUnicode=true&characterEncoding=utf8&allowPublicKeyRetrieval=true
 #    username: fanmysql
 #    password: 06152022sS
+
+
   profiles:
     active: dev
+
   mail:
-    host: smtp.qq.com
-    username: 593931651@qq.com
-    password: mqzumfzoivpobeee
+    host: smtpdm.aliyun.com
+    username: biaogehua@auditall.cn
+    password: 06302018faNZ
     properties:
       mail:
         smtp:
           socketFactory: class:javax.net.ssl.SSLSocketFactory
-          port: 587
-    default-encoding: utf-8
+          port: 80
+    default-encoding: UTF-8
     protocol: smtp
+  #  mail:
+#    host: smtp.qq.com
+#    username: 593931651@qq.com
+#    password: qanbvjysiqxvbbeb
+#    properties:
+#      mail:
+#        smtp:
+#          socketFactory: class:javax.net.ssl.SSLSocketFactory
+#          port: 587
+#    default-encoding: utf-8
+#    protocol: smtp
   mvc:
     async:
       request-timeout: 60000
   redis:
 #    host: 127.0.0.1
-    #    host: 39.106.186.110
+#    host: 39.106.186.110
     host: 101.200.121.0
     port: 6379
     password: 06152022ss
@@ -77,8 +91,10 @@ logging:
     root: info
 
 selfDefination:
-  emailSender: 593931651@qq.com
+  emailSender: biaogehua@auditall.cn
+#  emailSender: 593931651@qq.com
   validateAddress: http://www.auditall.cn/validate
+#  validateAddress: http://localhost:8080/validate
 
 
 

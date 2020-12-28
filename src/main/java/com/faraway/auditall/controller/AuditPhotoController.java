@@ -62,8 +62,16 @@ public class AuditPhotoController {
             //获得审核页面编号
             int page = auditPhoto.getAuditPage();
 
+            //4 设置图片更新日期，以给图片增加时间戳
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");//设置日期格式
+            Date date = new Date();
+            auditPhoto.setUpdateTime(date);
+            String picDate = df.format(date);
+
             //图片数量信息放入数据库，并得到图片数量
             int numberData = auditPhotoServiceImp.insertOrUpdateAuditPhoto(auditPhoto);
+
+
 
             //获得审核者姓名
             String name = "";
@@ -77,7 +85,7 @@ public class AuditPhotoController {
                 case 2://前端返回的图片数量为2
                     if (tempList != null && tempList.size() > 0) {
                         for (int i = 0; i < tempList.size(); i++) {
-                            String fileName = "name" + name + "page" + page + "num" + i + ".jpg";//文件名
+                            String fileName = picDate+"name" + name + "page" + page + "num" + i + ".jpg";//文件名
                             try {//Ba64解码
                                 FileOutputStream fos = new FileOutputStream(new File(PATH + fileName));
                                 byte[] dBytes = Base64.getDecoder().decode(tempList.get(i));
@@ -91,7 +99,7 @@ public class AuditPhotoController {
                     break;
                 case 1://前端返回的图片数量为1
                     for (int i = 0; i < 2; i++) {//删除所有对应页码已有文件
-                        String fileName = "name" + name + "page" + page + "num" + i + ".jpg";
+                        String fileName = picDate+"name" + name + "page" + page + "num" + i + ".jpg";
                         File file = new File(PATH + fileName);
 
                         if (file.exists()) {
@@ -99,7 +107,7 @@ public class AuditPhotoController {
                         }
                     }
                     try {//Ba64解码
-                        String fileName = "name" + name + "page" + page + "num" + 0 + ".jpg";
+                        String fileName = picDate+"name" + name + "page" + page + "num" + 0 + ".jpg";
                         FileOutputStream fos = new FileOutputStream(new File(PATH + fileName));
                         byte[] dBytes = Base64.getDecoder().decode(tempList.get(0));
                         fos.write(dBytes);
@@ -111,7 +119,7 @@ public class AuditPhotoController {
 
                 default://前端返回的图片数量为0
                     for (int i = 0; i < 2; i++) {//删除所有对应页码已有文件
-                        String fileName = "name" + name + "page" + page + "num" + i + ".jpg";
+                        String fileName = picDate+"name" + name + "page" + page + "num" + i + ".jpg";
                         File file = new File(PATH + fileName);
                         if (file.exists()) {
                             file.delete();

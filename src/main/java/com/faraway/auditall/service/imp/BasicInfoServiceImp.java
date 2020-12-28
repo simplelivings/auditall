@@ -117,7 +117,7 @@ public class BasicInfoServiceImp implements BasicInfoService {
                                 return checkLoginTime(maxLoginTimes,checkDay,userName);
                             case 9://超级付费用户，每天20次
                                 checkDay = 1;
-                                maxLoginTimes = 200;
+                                maxLoginTimes = 20;
                                 return checkLoginTime(maxLoginTimes,checkDay,userName);
                             default:
                                 return -1;

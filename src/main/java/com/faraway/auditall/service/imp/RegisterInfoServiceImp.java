@@ -14,6 +14,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class RegisterInfoServiceImp implements RegisterInfoService {
@@ -119,6 +120,12 @@ public class RegisterInfoServiceImp implements RegisterInfoService {
 
         RegisterInfo registerInfo = findOneRegisterByName(userName);
         String reciever = registerInfo.getEmailAddress();
+        String returnNum = getRandomString(6);
+        registerInfo.setReturnNum(returnNum);
+
+        QueryWrapper<RegisterInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userName",userName);
+        registerInfoMapper.update(registerInfo,queryWrapper);
 
         helper.setFrom(sender);
         helper.setTo(reciever);
@@ -131,7 +138,14 @@ public class RegisterInfoServiceImp implements RegisterInfoService {
 
         hyperLinks.append(validateAddress);
         hyperLinks.append("/"+userName);
-        hyperLinks.append(">重置密码</a><p>如无法跳转，请复制以下地址至浏览器访问：</p>");
+        hyperLinks.append(">重置密码</a>");
+        hyperLinks.append("<p> </p>");
+        hyperLinks.append("<p>并输入如下校验码：</p>");
+        hyperLinks.append("<p>校验码:  ");
+        hyperLinks.append(returnNum);
+        hyperLinks.append("</p>");
+        hyperLinks.append("<p> </p>");
+        hyperLinks.append("<p>如无法跳转，请复制以下地址至浏览器访问：</p>");
         hyperLinks.append("<p style=color:red;>");
         hyperLinks.append(validateAddress);
         hyperLinks.append("/"+userName);
@@ -141,17 +155,52 @@ public class RegisterInfoServiceImp implements RegisterInfoService {
         mailSender.send(message);
     }
 
+    /**
+     * 用于用户忘记密码，重新更改密码
+     * @param registerInfo
+     * @return
+     */
+
     @Override
     public int updateRegister(RegisterInfo registerInfo) {
 
         if (registerInfo!=null){
-            QueryWrapper<RegisterInfo> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("userName",registerInfo.getUserName());
-            registerInfoMapper.update(registerInfo,queryWrapper);
-            return 1;
+            //判断前端返回注册信息，用户名与校验码是否为空
+            if (registerInfo.getUserName()!=null&&registerInfo.getUserName().length()>0
+                &&registerInfo.getReturnNum()!=null && registerInfo.getReturnNum().length()>0){
+                String userName = registerInfo.getUserName();
+                RegisterInfo registerInfo1 = findOneRegisterByName(userName);
+                if (registerInfo1.getReturnNum()!=null){
+
+                    //判断前后端校验码是否一致
+                    if (registerInfo.getReturnNum().equalsIgnoreCase(registerInfo1.getReturnNum())){
+                        QueryWrapper<RegisterInfo> queryWrapper = new QueryWrapper<>();
+                        queryWrapper.eq("userName",userName);
+                        registerInfoMapper.update(registerInfo,queryWrapper);
+                        return 1;
+                    }else {
+                        return -1;
+                    }
+                }else {
+                    return -1;
+                }
+            }else {
+                return -1;
+            }
         }else{
             return -1;
         }
+    }
+
+    public String getRandomString(int length){
+        String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random=new Random();
+        StringBuffer sb=new StringBuffer();
+        for(int i=0;i<length;i++){
+            int number=random.nextInt(62);
+            sb.append(str.charAt(number));
+        }
+        return sb.toString();
     }
 
 }

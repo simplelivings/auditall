@@ -46,10 +46,19 @@ public class InspectPhotoController {
     @Autowired
     private InspectInfoServiceImp inspectInfoServiceImp;
 
+    /**
+    图片保存至后端，并将图片存至数据库
+     1 新建图片文件
+     2 判断inspectPhoto是否合法，合法则继续操作
+     3 获得图片的list，页面编号，用户名
+     4 设置图片更新日期，以给图片增加时间戳
+     5 图片放入数据库，并得到图片数量
+     6 依据图片数量，将图片Base64解码，并存入服务器或删除图片
+     */
     @PostMapping(value = "/insert")
     public int insertAuditPhoto(@RequestBody InspectPhoto inspectPhoto) throws IOException, MessagingException, InterruptedException {
 
-        //图片存放路径
+        //1 新建图片文件
         String PATH = "src/picture/";
         File file0 = new File(PATH);
         if (!file0.exists()) {
@@ -59,32 +68,28 @@ public class InspectPhotoController {
         //返回值
         int returnNum = 0;
 
-        log.info("===分层审核图片  controller userName==="+inspectPhoto.getUserName());
-
-
-        if (inspectPhoto != null && inspectPhoto.getAuditPhotoList() != null && inspectPhoto.getAuditPhotoList().size() > 0 && inspectPhoto.getUserName() != null && inspectPhoto.getUserName().length() > 0) {
-            //获得图片src的list
+        //2 判断inspectPhoto是否合法，合法则继续操作
+        if (inspectPhoto != null && inspectPhoto.getAuditPhotoList() != null && inspectPhoto.getAuditPhotoList().size() > 0 &&
+                inspectPhoto.getUserName() != null && inspectPhoto.getUserName().length() > 0) {
+            //3 获得图片的list，页面编号，用户名
             List<String> tempList = inspectPhoto.getAuditPhotoList();
-
             //获得审核页面编号
             int page = inspectPhoto.getAuditPage();
+            //获得审核者姓名
+            String name = inspectPhoto.getUserName();
 
-            SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmms");//设置日期格式
+            //4 设置图片更新日期，以给图片增加时间戳
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");//设置日期格式
             Date date = new Date();
             inspectPhoto.setUpdateTime(date);
             String picDate = df.format(date);
 
-            System.out.println("=====controller  picDate==="+picDate);
-
-
-            //图片数量信息放入数据库，并得到图片数量
+            //5 图片放入数据库，并得到图片数量
             int numberData = inspectPhotoServiceImp.insertOrUpdateInspectPhoto(inspectPhoto);
 
 
-            //获得审核者姓名
-            String name = inspectPhoto.getUserName();
 
-            //图片Base64解码，并存入服务器
+            //6 图片Base64解码，并存入服务器
             switch (numberData) {
                 case 2://前端返回的图片数量为2
                     if (tempList != null && tempList.size() > 0) {
@@ -111,7 +116,7 @@ public class InspectPhotoController {
                         }
                     }
                     try {//Ba64解码
-                        String fileName =  picDate+"name" + name + "page" + page + "num" + 0 + ".jpg";
+                        String fileName = picDate+"name" + name + "page" + page + "num" + 0 + ".jpg";
                         FileOutputStream fos = new FileOutputStream(new File(PATH + fileName));
                         byte[] dBytes = Base64.getDecoder().decode(tempList.get(0));
                         fos.write(dBytes);
@@ -135,7 +140,6 @@ public class InspectPhotoController {
         } else {
             returnNum = 0;
         }
-
         return returnNum;
     }
 
@@ -146,6 +150,7 @@ public class InspectPhotoController {
         //返回值
         int returnNum = 0;
 
+        //如果前端传入数据不为空，则生成excel
         if (inspectPhoto!= null &&inspectPhoto.getUserName() != null && inspectPhoto.getUserName().length() > 0) {
             inspectInfoServiceImp.generateExcel(inspectPhoto);
             returnNum = 200;

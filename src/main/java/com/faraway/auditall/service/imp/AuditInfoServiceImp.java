@@ -145,6 +145,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
         String PATH = "src/picture/";  //EXCEL存放路径
         String FONTNAME = "黑体";
         String familyName = "";
+        String picDate = "";
 
         File file0 = new File(PATH);
         if (!file0.exists()) {
@@ -327,7 +328,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
             cellTitle4.setCellValue(tempTitleList4[i]);
             cellTitle4.setCellStyle(cellStyleTitle1);
 
-            System.out.println("++++++++======tempContentList4=========+++++++++"+i+"==="+tempContentList4[i]);
+            System.out.println("++++++++======tempContentList4=========+++++++++" + i + "===" + tempContentList4[i]);
             Cell cellContent4 = rowTitle4.createCell(i * 3 + 1);
             cellContent4.setCellValue(tempContentList4[i]);
             cellContent4.setCellStyle(cellStyleContent);
@@ -391,9 +392,13 @@ public class AuditInfoServiceImp implements AuditInfoService {
 
                 if (auditPhotoList != null && auditPhotoList.size() > 0) {
                     for (int j = 0; j < auditPhotoList.size(); j++) {
+                        if (auditPhotoList.get(j).getUpdateTime() != null) {
+                            picDate = df.format(auditPhotoList.get(j).getUpdateTime());
+                        }
+
                         if (auditPhotoList.get(j).getAuditPage() == (i + 1)) {
                             if (auditPhotoList.get(j).getPhotoNumber() == 0) {
-                                String pathPictrue = "src/picture/" + "name" + userName + "page" + (i + 1) + "num" + 0 + ".jpg";
+                                String pathPictrue = "src/picture/" + picDate + "name" + userName + "page" + (i + 1) + "num" + 0 + ".jpg";
                                 File file = new File(pathPictrue);
                                 if (file.exists()) {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -410,7 +415,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
                                     }
                                 }
                             } else if (auditPhotoList.get(j).getPhotoNumber() == 1) {
-                                String pathPictrue = "src/picture/" + "name" + userName + "page" + (i + 1) + "num" + 1 + ".jpg";
+                                String pathPictrue = "src/picture/" + picDate + "name" + userName + "page" + (i + 1) + "num" + 1 + ".jpg";
                                 File file = new File(pathPictrue);
                                 if (file.exists()) {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -457,9 +462,14 @@ public class AuditInfoServiceImp implements AuditInfoService {
             // 删除所有文件
             if (auditPhotoList != null && auditPhotoList.size() > 0) {
                 for (int i = 0; i < auditPhotoList.size(); i++) {
+
+                    if (auditPhotoList.get(i).getUpdateTime() != null) {
+                        picDate = df.format(auditPhotoList.get(i).getUpdateTime());
+                    }
                     for (int j = 0; j < 2; j++) {
-                        String fileName = PATH + "name" + userName + "page" + i + "num" + j + ".jpg";
+                        String fileName = PATH + picDate+"name" + userName + "page" + i + "num" + j + ".jpg";
                         File file = new File(fileName);
+                        System.out.println("*******fileName***"+fileName+"**i**"+i);
                         if (file.exists()) {
                             file.delete();
                         }
@@ -508,7 +518,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
 
         List<AuditName> auditNameList = auditNameServiceImp.findAllSenderAndReceiver();
         for (int i = 0; i < auditNameList.size(); i++) {
-            if (auditNameList.get(i).getReceiver() != null && auditNameList.get(i).getReceiver().length()>0) {
+            if (auditNameList.get(i).getReceiver() != null && auditNameList.get(i).getReceiver().length() > 0) {
                 tempReceiverList.add(auditNameList.get(i).getReceiver());
             }
             if (auditNameList.get(i).getSender() != null) {
@@ -518,7 +528,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
 
         String tempReciever = null;
         if (registerInfoServiceImp.findOneRegisterByName(userName) != null) {
-            if (registerInfoServiceImp.findOneRegisterByName(userName).getUserRight()>0){
+            if (registerInfoServiceImp.findOneRegisterByName(userName).getUserRight() > 0) {
                 tempReciever = registerInfoServiceImp.findOneRegisterByName(userName).getEmailAddress();
             }
         }
@@ -534,7 +544,7 @@ public class AuditInfoServiceImp implements AuditInfoService {
         System.out.println("receiverList=========" + Arrays.toString(receiverList));
 
         //邮件内容
-        helper.setText("审核内容", true);
+        helper.setText("分层审核内容见附件，请查收！", true);
         if (receiverList != null) {
             helper.setTo(receiverList);
         }

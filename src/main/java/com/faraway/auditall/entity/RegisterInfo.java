@@ -36,6 +36,8 @@ public class RegisterInfo {
 
     private Integer registerStatue;
 
+    private String returnNum;
+
     private String corpName;
 
     @TableField(fill = FieldFill.INSERT)

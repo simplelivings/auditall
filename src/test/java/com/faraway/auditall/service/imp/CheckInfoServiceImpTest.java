@@ -1,14 +1,12 @@
 package com.faraway.auditall.service.imp;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.faraway.auditall.entity.AuditName;
 import com.faraway.auditall.entity.CheckInfo;
 import com.faraway.auditall.entity.CheckPhoto;
 import com.faraway.auditall.entity.RegisterInfo;
 import com.faraway.auditall.mapper.CheckInfoMapper;
-import com.faraway.auditall.service.AuditNameService;
-import com.faraway.auditall.service.CheckInfoService;
 import com.faraway.auditall.utils.BufferedImageBuilder;
+//import com.sun.xml.internal.org.jvnet.mimepull.MIMEMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
@@ -16,26 +14,31 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.imageio.ImageIO;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
+import javax.mail.*;
+import javax.mail.internet.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
-@Service
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
 @Slf4j
-public class CheckInfoServiceImp implements CheckInfoService {
+class CheckInfoServiceImpTest {
 
     @Autowired
     private CheckInfoMapper checkInfoMapper;
@@ -52,57 +55,9 @@ public class CheckInfoServiceImp implements CheckInfoService {
     @Autowired
     private CheckPhotoServiceImp checkPhotoServiceImp;
 
-    @Override
-    public List<CheckInfo> findAllCheckInfo() {
-        List<CheckInfo> checkInfoList = checkInfoMapper.selectList(null);
-        return checkInfoList;
 
-    }
-
-
-    @Override
-    public void deleteAllCheckInfo() {
-        checkInfoMapper.delete(null);
-    }
-
-    /*
-     * 判断思路：
-     * 根据用户名、零件号、检验类型、生产数量、生产时间，来判断数据库中是否有数据；
-     * -生产时间，由小时和分钟的十位组成，如此可在短期内更新错误输入状态；
-     *  并防止一个产品在不同时间段生产时，将前面数据覆盖；
-     * -生产日期，为自动生成，用于插入excel时用；
-     * */
-
-    @Override
-    public int insertOrUpdateCheckInfo(CheckInfo checkInfo) {
-        if (checkInfo != null) {
-            checkInfo.setCreateTime(new Date());
-            QueryWrapper<CheckInfo> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("userName", checkInfo.getUserName())
-                    .eq("partNum", checkInfo.getPartNum())
-                    .eq("checkType", checkInfo.getCheckType())
-                    .eq("productNum", checkInfo.getProductNum())
-                    .eq("produceTime", checkInfo.getProduceTime());
-            CheckInfo checkInfoExist = null;
-            if (checkInfoMapper.selectOne(queryWrapper) != null) {
-                checkInfoExist = checkInfoMapper.selectOne(queryWrapper);
-            }
-
-            if (checkInfoExist != null) {
-                checkInfoMapper.update(checkInfo, queryWrapper);
-                return 1;
-            } else {
-                checkInfoMapper.insert(checkInfo);
-                return 2;
-            }
-        } else {
-            log.error("===插入检验信息失败===");
-            return 0;
-        }
-    }
-
-    @Override
-    public void gererateExcel() throws IOException, MessagingException, InterruptedException {
+    @Test
+    void gererateExcel() throws IOException, InterruptedException, MessagingException {
         String PATH = "src/picture/";  //EXCEL存放路径
         String FONTNAME = "黑体";
 
@@ -304,7 +259,7 @@ public class CheckInfoServiceImp implements CheckInfoService {
 
                             //插入第一张照片
                             if (checkPhotoList.get(j).getPhotoNumber() == 0) {
-                                String pathPictrue = "src/picture/" +checkPhotoList.get(j).getPartNum() + "type" + checkPhotoList.get(j).getCheckType() + "num" + 0 + "p" + checkPhotoList.get(j).getProduceTime() + ".jpg";
+                                String pathPictrue = "src/picture/"+checkPhotoList.get(j).getPartNum() + "type" + checkPhotoList.get(j).getCheckType() + "num" + 0 + "p" + checkPhotoList.get(j).getProduceTime() + ".jpg";
                                 File file = new File(pathPictrue);
                                 if (file.exists()) {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -320,7 +275,7 @@ public class CheckInfoServiceImp implements CheckInfoService {
                                     }
                                 }
                             } else if (checkPhotoList.get(j).getPhotoNumber() == 1) {//插入第二张照片（实际并未使用）
-                                String pathPictrue = "src/picture/" +checkPhotoList.get(j).getPartNum() + "type" + checkPhotoList.get(j).getCheckType() + "num" + 1 + "p" + checkPhotoList.get(j).getProduceTime() + ".jpg";
+                                String pathPictrue = "src/picture/"+checkPhotoList.get(j).getPartNum() + "type" + checkPhotoList.get(j).getCheckType() + "num" + 1 + "p" + checkPhotoList.get(j).getProduceTime() + ".jpg";
                                 File file = new File(pathPictrue);
                                 if (file.exists()) {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -359,7 +314,6 @@ public class CheckInfoServiceImp implements CheckInfoService {
             long endExcel = System.currentTimeMillis();
             emailFile("检验记录" + shortDate, excelPath);
 
-            log.info("===excel=time===" + (double) (endExcel - beginExcel) / 1000);
 
 
             Thread.sleep(10000);
@@ -377,20 +331,25 @@ public class CheckInfoServiceImp implements CheckInfoService {
                 }
             }
 
-            File file = new File(excelPath);
-            if (file.exists()) {
-                file.delete();
-            }
-
-            log.info("===删除检验信息完成===");
+//            File file = new File(excelPath);
+//            if (file.exists()) {
+//                file.delete();
+//            }
 
         }
+    }
 
+    @Test
+    public void testEmailCount() throws UnsupportedEncodingException, MessagingException {
+        for (int i=0;i <50;i++){
+            emailFile("ssttddd"+1,"ccc");
+        }
+        System.out.println("email成功");
     }
 
 
     //发送邮件的方法
-    public void emailFile(String fileName, String path) throws MessagingException, UnsupportedEncodingException {
+    public void emailFile(String fileName,String path) throws MessagingException, UnsupportedEncodingException {
 
         //1、创建一个复杂的邮件
         System.setProperty("mail.mime.charset", "UTF-8");
@@ -417,7 +376,7 @@ public class CheckInfoServiceImp implements CheckInfoService {
 
         List<RegisterInfo> registerInfoList = new ArrayList<>();
         if (registerInfoServiceImp.findAllRegister()!=null){
-          registerInfoList = registerInfoServiceImp.findAllRegister();
+            registerInfoList = registerInfoServiceImp.findAllRegister();
         }
 
         if (registerInfoList!=null && registerInfoList.size()>0){
@@ -445,14 +404,76 @@ public class CheckInfoServiceImp implements CheckInfoService {
             helper.setFrom(sender);
         }
 
-        File file = new File(path);
-        if (file.exists()) {
-            //附件添加word文档
-            helper.addAttachment(MimeUtility.encodeText(fileName) + ".xlsx", file);
-        }
+//        File file = new File(path);
+//        if (file.exists()) {
+//            //附件添加word文档
+//            helper.addAttachment(MimeUtility.encodeText(fileName) + ".xlsx", file);
+//        }
         javaMailSender.send(mimeMessage);
 
         log.info("===检验信息邮件，发送完成===");
 
+    }
+    public List<CheckInfo> findAllCheckInfo() {
+        List<CheckInfo> checkInfoList = checkInfoMapper.selectList(null);
+        return checkInfoList;
+
+    }
+
+
+    @Test
+    public void testMail(){
+         final String ALIDM_SMTP_HOST = "smtpdm.aliyun.com";
+         final String ALIDM_SMTP_PORT = "80";
+         final Properties props = new Properties();
+         props.put("mail.smtp.auth","true");
+         props.put("mail.smtp.host",ALIDM_SMTP_HOST);
+         props.put("mail.smtp.port",ALIDM_SMTP_PORT);
+         props.put("mail.user","biaogehua@auditall.cn");
+         props.put("mail.password","06302018faNZ");
+
+        Authenticator authenticator = new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                String userName = props.getProperty("mail.user");
+                String password = props.getProperty("mail.password");
+                return new PasswordAuthentication(userName,password);
+            }
+        };
+
+        Session mailSession = Session.getInstance(props,authenticator);
+        MimeMessage message = new MimeMessage(mailSession){};
+        try {
+            InternetAddress from = new InternetAddress("biaogehua@auditall.cn","表格花");
+            message.setFrom(from);
+
+            Address[] a = new Address[1];
+            a[0] = new InternetAddress("biaogehua@auditall.cn");
+            message.setReplyTo(a);
+
+            InternetAddress to = new InternetAddress("xuhaikun1113@163.com");
+            message.setRecipient(MimeMessage.RecipientType.TO,to);
+
+            message.setSubject("测试邮件");
+            message.setContent("测试的邮件","text/html;charset=UTF-8");
+
+            BodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setText("消息Text");
+
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(messageBodyPart);
+            messageBodyPart = new MimeBodyPart();
+            String PATH = "src\\picture\\自动排产规划.xlsx";  //EXCEL存放路径
+            FileDataSource source = new FileDataSource(PATH);
+            messageBodyPart.setDataHandler(new DataHandler(source));
+            messageBodyPart.setFileName(MimeUtility.encodeText(PATH));
+            messageBodyPart.addHeader("Content-Transfer-Encoding","base64");
+            multipart.addBodyPart(messageBodyPart);
+            message.setContent(multipart);
+
+            Transport.send(message);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 }

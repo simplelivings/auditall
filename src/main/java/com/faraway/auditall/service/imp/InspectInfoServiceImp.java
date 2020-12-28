@@ -64,9 +64,17 @@ public class InspectInfoServiceImp implements InspectInfoService {
     @Autowired
     private BasicInfoMapper basicInfoMapper;
 
+    //邮件发送者地址，在配置文件中引用
     @Value("${selfDefination.emailSender}")
     private String sender;
 
+    /**
+     *
+     * @param inspectInfo
+     * @return
+     * 插入或更新检查信息
+     * 依据用户名和页面，2个关键字，插入检查信息
+     */
     @Override
     public int insertOrUpdateInspectInfo(InspectInfo inspectInfo) {
 
@@ -76,47 +84,60 @@ public class InspectInfoServiceImp implements InspectInfoService {
             InspectInfo inspectInfoTemp = inspectInfoMapper.selectOne(queryWrapper);
             if (inspectInfoTemp != null) {
                 inspectInfoMapper.update(inspectInfo, queryWrapper);
+                return 1;
             } else {
                 inspectInfoMapper.insert(inspectInfo);
+                return 2;
             }
+        }else {
+            return 0;
         }
-        return 0;
     }
 
+    /**
+     * 删除所有审核信息
+     */
     @Override
     public void deleteAllInspectInfo() {
         inspectInfoMapper.delete(null);
     }
 
+    /**
+     * 生成excel表
+     * @param inspectPhoto
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws MessagingException
+     */
     @Override
     public void generateExcel(InspectPhoto inspectPhoto) throws IOException, InterruptedException, MessagingException {
         String PATH = "src/picture/";  //EXCEL存放路径
         String FONTNAME = "楷体";
         String familyName = "";
+        String userName = "";
+        Short titleFontSize = 20;//excle标题字号大小
+        Short contentFontSize = 11;//excel内容字号大小
+        String picDate = "";
+
+        //延迟5秒后，再写数据至excel
+        Thread.sleep(5000);
 
         File file0 = new File(PATH);
         if (!file0.exists()) {
             file0.mkdirs();
         }
 
-//        Thread.sleep(5000);
 
-
-        Short titleFontSize = 20;//excle标题字号大小
-        Short contentFontSize = 11;//excel内容字号大小
 
         //获取当前时间，用于文件命名
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmms");//设置日期格式
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");//设置日期格式
         String date = df.format(new Date());
 
         SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd");
         String shortDate = df1.format(new Date());
-        String picDate = "";
-
 
 
         //寻找图片用信息
-        String userName = "";
         if (inspectPhoto.getUserName() != null) {
             userName = inspectPhoto.getUserName();//用户名
         }
@@ -128,9 +149,7 @@ public class InspectInfoServiceImp implements InspectInfoService {
 
         String excelPath = PATH + familyName + date + "audit.xlsx";
 
-
         long beginData = System.currentTimeMillis();
-
 
         //依据用户名，从数据库获得基本信息
         QueryWrapper<BasicInfo> queryWrapperBasicInfo = new QueryWrapper<>();
@@ -157,11 +176,6 @@ public class InspectInfoServiceImp implements InspectInfoService {
         if (inspectPhotoMapper.selectList(queryWrapperAuditPhoto) != null) {
             auditPhotoList = inspectPhotoMapper.selectList(queryWrapperAuditPhoto);
         }
-
-        for (InspectPhoto photo : auditPhotoList) {
-            System.out.println("=====photo=====" + photo);
-        }
-
 
 
         long endData = System.currentTimeMillis();
@@ -349,11 +363,12 @@ public class InspectInfoServiceImp implements InspectInfoService {
         }
 
 
-        //写入数据至Excel
+        //按行写入数据至Excel，每行先写入文字信息，然后写入图片
         if (auditInfoList != null && auditInfoList.size() > 0) {
 
             for (int i = 0; i < auditInfoList.size(); i++) {
 
+                //处理问题性质，1-批评 2-表扬 3-展示
                 String auditConformTemp = "";
                 if (auditInfoList.get(i).getAuditCon() != null) {
                     if (auditInfoList.get(i).getAuditCon() == 1) {
@@ -373,7 +388,6 @@ public class InspectInfoServiceImp implements InspectInfoService {
 
 
                 //创建数组，存放每行信息，方便写入
-//                if((auditInfoList.get(i).getAuditFind() != null)&&(auditInfoList.get(i).getAuditFind().length()>0))  {
                 String[] tempList = {
                         auditInfoList.get(i).getAuditPage().toString(),
                         shortDate,
@@ -383,7 +397,7 @@ public class InspectInfoServiceImp implements InspectInfoService {
                         auditInfoList.get(i).getAuditCharger()
                 };
 
-
+                //文字信息写入excel
                 for (int j = 0; j < tempList.length; j++) {
                     //根据行，创建单元格
                     Cell cell = row.createCell(j);
@@ -391,23 +405,23 @@ public class InspectInfoServiceImp implements InspectInfoService {
                     cell.setCellStyle(cellStyleContent);
                 }
 
-
+                //图片信息写入excel
                 if (auditPhotoList != null && auditPhotoList.size() > 0) {
 
                     for (int j = 0; j < auditPhotoList.size(); j++) {
 
-                        picDate = df.format(auditInfoList.get(j).getUpdateTime());
-                        System.out.println("=====service  picDate==="+picDate);
+                        if (auditPhotoList.get(j).getUpdateTime() != null) {
+                            picDate = df.format(auditPhotoList.get(j).getUpdateTime());
+                        }
 
                         if ((auditPhotoList.get(j).getAuditPage() == (i + 1))) {
 
                             if (auditPhotoList.get(j).getPhotoNumber() == 0) {
-                                String pathPictrue = "src/picture/" + picDate+"name" + userName + "page" + (i + 1) + "num" + 0 + ".jpg";
+                                String pathPictrue = "src/picture/" + picDate + "name" + userName + "page" + (i + 1) + "num" + 0 + ".jpg";
                                 File file = new File(pathPictrue);
                                 if (file.exists()) {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                                     Image src = Toolkit.getDefaultToolkit().getImage(file.getPath());
-//                                BufferedImage  bufferedImage = ImageIO.read(new File(pathPictrue));
                                     BufferedImage bufferedImage = BufferedImageBuilder.toBufferedImage(src);
                                     ImageIO.write(bufferedImage, "jpg", bos);
                                     Drawing patriarch = sheet.createDrawingPatriarch();
@@ -419,7 +433,7 @@ public class InspectInfoServiceImp implements InspectInfoService {
                                     }
                                 }
                             } else if (auditPhotoList.get(j).getPhotoNumber() == 1) {
-                                String pathPictrue = "src/picture/" + picDate+"name" + userName + "page" + (i + 1) + "num" + 1 + ".jpg";
+                                String pathPictrue = "src/picture/" + picDate + "name" + userName + "page" + (i + 1) + "num" + 1 + ".jpg";
                                 File file = new File(pathPictrue);
                                 if (file.exists()) {
                                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -438,7 +452,6 @@ public class InspectInfoServiceImp implements InspectInfoService {
                             }
                         }
                     }
-
 
                 }
 
@@ -464,19 +477,21 @@ public class InspectInfoServiceImp implements InspectInfoService {
             //清除临时文件
             ((SXSSFWorkbook) workbook).dispose();
 
-//            long endExcel = System.currentTimeMillis();
-//            emailFile("检查问题" + shortDate + familyName, excelPath, inspectPhoto.getUserName(), inspectPhoto.getLoginNum());
-//
-//            System.out.println("=========excel=time=======" + (double) (endExcel - beginExcel) / 1000);
-//
-//
+            long endExcel = System.currentTimeMillis();
+            //发送邮件
+            emailFile("检查问题" + shortDate + familyName, excelPath, inspectPhoto.getUserName(), inspectPhoto.getLoginNum());
+
+            System.out.println("=========excel=time=======" + (double) (endExcel - beginExcel) / 1000);
+
+            // 延时5s后，删除所有文件
             Thread.sleep(5000);
-//
-            // 删除所有文件
             if (auditPhotoList != null && auditPhotoList.size() > 0) {
                 for (int i = 0; i < auditPhotoList.size(); i++) {
+                    if (auditPhotoList.get(i).getUpdateTime() != null) {
+                        picDate = df.format(auditPhotoList.get(i).getUpdateTime());
+                    }
                     for (int j = 0; j < 2; j++) {
-                        String fileName = PATH + "name" + userName + "page" + i + "num" + j + ".jpg";
+                        String fileName = PATH + picDate + "name" + userName + "page" + i + "num" + j + ".jpg";
                         File file = new File(fileName);
                         if (file.exists()) {
                             file.delete();
@@ -484,12 +499,11 @@ public class InspectInfoServiceImp implements InspectInfoService {
                     }
                 }
             }
-//
-//
-//            File file = new File(excelPath);
-//            if (file.exists()) {
-//                file.delete();
-//            }
+
+            File file = new File(excelPath);
+            if (file.exists()) {
+                file.delete();
+            }
 
             basicInfoMapper.delete(queryWrapperBasicInfo);
             inspectInfoMapper.delete(queryWrapperAuditInfo);
@@ -550,26 +564,30 @@ public class InspectInfoServiceImp implements InspectInfoService {
         }
 
         //邮件接收人的数组
-        String[] receiverList = tempReceiverList.toArray(new String[0]);
-        System.out.println("receiverList=========" + Arrays.toString(receiverList));
+        if (tempReceiverList!=null && tempReceiverList.size()>0){
 
-        //邮件内容
-        helper.setText("检查内容见附件，请查收！", true);
-        if (receiverList != null) {
-            helper.setTo(receiverList);
-        }
-        if (sender != null) {
-            helper.setFrom(sender);
-        }
+            String[] receiverList = tempReceiverList.toArray(new String[0]);
+            System.out.println("receiverList=========" + Arrays.toString(receiverList));
+            String nick = "";
+            nick = javax.mail.internet.MimeUtility.encodeText("表格花");
+            //邮件内容
+            helper.setText("检查内容见附件，请查收！", true);
+            if (receiverList != null) {
+                helper.setTo(receiverList);
+            }
+            if (sender != null) {
+                helper.setFrom(nick + " <"+sender+">");
+            }
 
-        File file = new File(path);
-        if (file.exists()) {
-            //附件添加word文档
-            helper.addAttachment(MimeUtility.encodeText(fileName) + ".xlsx", file);
-        }
-        javaMailSender.send(mimeMessage);
+            File file = new File(path);
+            if (file.exists()) {
+                //附件添加word文档
+                helper.addAttachment(MimeUtility.encodeText(fileName) + ".xlsx", file);
+            }
+            javaMailSender.send(mimeMessage);
 
-        log.info("===检查信息 邮件发送完成===");
-        System.out.println("===检查信息 邮件发送完成===");
+            log.info("===检查信息 邮件发送完成===");
+            System.out.println("===检查信息 邮件发送完成===");
+        }
     }
 }
